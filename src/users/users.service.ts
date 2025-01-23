@@ -3,6 +3,7 @@ import {
   BadRequestException,
   NotFoundException,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -16,7 +17,7 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private jwtService: JwtService,
   ) {}
-
+  logger = new Logger('User service');
   async register(
     name: string,
     email: string,
@@ -24,12 +25,16 @@ export class UsersService {
     role: string,
     phoneNumber?: string,
   ) {
+    this.logger.log(`New user with mail ${email} is trying to register`);
+    this.logger.log(`Searching for user existance by mail: ${email}`);
     const existingUser = await this.userModel.findOne({ email });
     if (existingUser) {
       throw new BadRequestException('Email already in use');
     }
-
+    this.logger.log(`User name is free. ${email}`);
+    this.logger.log(`Hashing password`);
     const hashedPassword = await bcrypt.hash(password, 10);
+    this.logger.log(`Creating new user in MongoDB cluster.`);
     const newUser = new this.userModel({
       name,
       email,
@@ -38,7 +43,7 @@ export class UsersService {
       phoneNumber,
     });
     await newUser.save();
-
+    this.logger.log(`User ${email} is saved successfuly.`);
     return this.generateToken(newUser);
   }
 
@@ -57,7 +62,12 @@ export class UsersService {
   }
 
   private generateToken(user: UserDocument) {
-    const payload = { email: user.email, sub: user._id, role: user.role };
+    const payload = {
+      email: user.email,
+      sub: user._id,
+      role: user.role,
+      name: user.name,
+    };
     return {
       access_token: this.jwtService.sign(payload),
       user: {

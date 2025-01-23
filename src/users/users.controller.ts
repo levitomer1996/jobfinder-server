@@ -1,6 +1,9 @@
-import { Controller, Post, Body, Get, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { SignupDTO } from './DTO/SignupDTO';
+import { User } from './schemas/user.schema';
+import { GetUser } from './Decorators/get-user.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -9,20 +12,14 @@ export class UsersController {
   @Post('signup')
   async signup(
     @Body()
-    body: {
-      name: string;
-      email: string;
-      password: string;
-      role: string;
-      phoneNumber?: string;
-    },
+    signupDTO: SignupDTO,
   ) {
     return this.usersService.register(
-      body.name,
-      body.email,
-      body.password,
-      body.role,
-      body.phoneNumber,
+      signupDTO.name,
+      signupDTO.email,
+      signupDTO.password,
+      signupDTO.role,
+      signupDTO.phoneNumber,
     );
   }
 
@@ -30,9 +27,11 @@ export class UsersController {
   async signin(@Body() body: { email: string; password: string }) {
     return this.usersService.login(body.email, body.password);
   }
+
   @Get('me')
   @UseGuards(JwtAuthGuard) // ✅ Protect route using JWT
-  getMe(@Req() req) {
-    return req.user; // ✅ Returns user data if token is valid
+  getMe(@GetUser() user: User) {
+    console.log(user);
+    return user; // ✅ Returns user data if token is valid
   }
 }
