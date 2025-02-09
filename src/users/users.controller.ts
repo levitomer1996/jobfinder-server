@@ -1,25 +1,36 @@
-import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Logger } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { SignupDTO } from './DTO/SignupDTO';
+import { JobSeekerSignupDTO, EmployerSignupDTO } from './DTO/SignupDTO';
 import { User } from './schemas/user.schema';
 import { GetUser } from './Decorators/get-user.decorator';
+import Log from 'src/Helpers/Log';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+  logger = new Logger('User controller');
 
-  @Post('signup')
-  async signup(
-    @Body()
-    signupDTO: SignupDTO,
-  ) {
-    return this.usersService.register(
-      signupDTO.name,
-      signupDTO.email,
-      signupDTO.password,
-      signupDTO.role,
-      signupDTO.phoneNumber,
+  // ✅ Register JobSeeker
+  @Post('register/jobseeker')
+  async registerJobSeeker(@Body() jobSeekerDTO: JobSeekerSignupDTO) {
+    return this.usersService.registerJobSeeker(
+      jobSeekerDTO.name,
+      jobSeekerDTO.email,
+      jobSeekerDTO.password,
+      jobSeekerDTO.phoneNumber,
+    );
+  }
+
+  // ✅ Register Employer
+  @Post('register/employer')
+  async registerEmployer(@Body() employerDTO: EmployerSignupDTO) {
+    return this.usersService.registerEmployer(
+      employerDTO.name,
+      employerDTO.email,
+      employerDTO.password,
+      employerDTO.phoneNumber,
+      employerDTO.companyName,
     );
   }
 
@@ -29,9 +40,8 @@ export class UsersController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard) // ✅ Protect route using JWT
+  @UseGuards(JwtAuthGuard)
   getMe(@GetUser() user: User) {
-    console.log(user);
-    return user; // ✅ Returns user data if token is valid
+    return user;
   }
 }

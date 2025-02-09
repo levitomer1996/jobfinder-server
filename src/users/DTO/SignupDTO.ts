@@ -5,31 +5,60 @@ import {
   MaxLength,
   Matches,
   IsOptional,
-  IsEnum,
+  IsNotEmpty,
 } from 'class-validator';
 
-export class SignupDTO {
+export class EmployerSignupDTO {
   @IsString()
-  @MinLength(2)
-  @MaxLength(50)
+  @MinLength(2, { message: 'Name must be at least 2 characters long' })
+  @MaxLength(50, { message: 'Name must be at most 50 characters long' })
   name: string;
 
-  @IsEmail()
+  @IsEmail({}, { message: 'Invalid email address' })
   email: string;
 
   @IsString()
-  @MinLength(6)
-  @MaxLength(20)
+  @MinLength(6, { message: 'Password must be at least 6 characters long' })
+  @MaxLength(20, { message: 'Password must be at most 20 characters long' })
   @Matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/, {
-    message:
-      'Password must be at least 6 characters long, contain letters and numbers',
+    message: 'Password must contain letters and numbers',
   })
   password: string;
 
   @IsOptional()
   @IsString()
+  @Matches(/^\+?\d{7,15}$/, {
+    message: 'Phone number must be valid (7-15 digits)',
+  })
   phoneNumber?: string;
 
-  @IsEnum(['jobseeker', 'employer'])
-  role: string;
+  @IsNotEmpty({ message: 'Company name is required' })
+  @IsString()
+  @MinLength(2, { message: 'Company name must be at least 2 characters long' })
+  companyName: string;
+}
+
+export class JobSeekerSignupDTO {
+  @IsString()
+  @MinLength(2, { message: 'Name must be at least 2 characters long' })
+  @MaxLength(50, { message: 'Name must be at most 50 characters long' })
+  name: string;
+
+  @IsEmail({}, { message: 'Invalid email address' })
+  email: string;
+
+  @IsString()
+  @MinLength(6, { message: 'Password must be at least 6 characters long' })
+  @MaxLength(20, { message: 'Password must be at most 20 characters long' })
+  @Matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/, {
+    message: 'Password must contain letters and numbers',
+  })
+  password: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^\+?\d{7,15}$/, {
+    message: 'Phone number must be valid (7-15 digits)',
+  })
+  phoneNumber?: string;
 }

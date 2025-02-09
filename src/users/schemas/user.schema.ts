@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type UserDocument = User & Document;
 
@@ -19,6 +19,12 @@ export class User {
 
   @Prop({ required: true, enum: ['jobseeker', 'employer'] })
   role: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'JobSeeker', required: false })
+  jobSeekerProfile?: Types.ObjectId; // ✅ Reference to JobSeeker Schema
+
+  @Prop({ type: Types.ObjectId, ref: 'Employer', required: false })
+  employerProfile?: Types.ObjectId; // ✅ Reference to Employer Schema
 
   @Prop({ default: Date.now })
   createdAt: Date;

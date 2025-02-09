@@ -1,32 +1,28 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { User } from '../../users/schemas/user.schema';
-import mongoose from 'mongoose';
 
 export type JobSeekerDocument = JobSeeker & Document;
 
+class Experience {
+  company: String;
+  position: String;
+  years: String;
+}
+
 @Schema({ timestamps: true })
-export class JobSeeker extends User {
-  @Prop()
-  resume?: string; // File path or URL
+export class JobSeeker {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true }) // ✅ Reference to User instead of storing user details
+  user: Types.ObjectId;
 
-  @Prop([String])
-  experience: string[]; // List of past jobs
+  @Prop({ required: false, default: '' }) // ✅ No need to require fields from User schema
+  resume?: string;
 
-  @Prop([String])
-  skills: string[];
+  @Prop({ default: [] })
+  skills?: string[];
 
-  @Prop([String])
-  education: string[];
-
-  @Prop({ type: Object })
-  preferences: {
-    jobType?: string; // e.g., Full-time, Remote
-    salaryRange?: { min: number; max: number };
-  };
-
-  @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Job' }])
-  appliedJobs: mongoose.Types.ObjectId[];
+  @Prop({ default: 0 })
+  experience?: Experience;
 }
 
 export const JobSeekerSchema = SchemaFactory.createForClass(JobSeeker);

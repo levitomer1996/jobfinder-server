@@ -1,29 +1,25 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { User } from '../../users/schemas/user.schema';
-import mongoose from 'mongoose';
 
 export type EmployerDocument = Employer & Document;
 
 @Schema({ timestamps: true })
-export class Employer extends User {
-  @Prop({ required: true })
+export class Employer {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true }) // ✅ Reference to User
+  user: Types.ObjectId;
+
+  @Prop({ required: true }) // ✅ Company Name
   companyName: string;
 
-  @Prop()
-  industry?: string;
+  @Prop({ required: false }) // ✅ Company Website (Optional)
+  website?: string;
 
-  @Prop()
-  companyDescription?: string;
+  @Prop({ default: [] }) // ✅ Job Postings (Array of Job IDs)
+  jobPostings?: Types.ObjectId[];
 
-  @Prop()
-  logo?: string; // Company logo URL
-
-  @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Job' }])
-  jobListings: mongoose.Types.ObjectId[];
-
-  @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'JobSeeker' }])
-  shortlistedCandidates: mongoose.Types.ObjectId[];
+  @Prop({ default: [] }) // ✅ Reviews Received (Array of Review IDs)
+  reviews?: Types.ObjectId[];
 }
 
 export const EmployerSchema = SchemaFactory.createForClass(Employer);

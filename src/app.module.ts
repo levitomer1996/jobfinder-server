@@ -14,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }), // Load .env globally
     MongooseModule.forRoot(process.env.MONGO_URI), // Change to your MongoDB URI
+
     UsersModule,
     JobseekersModule,
     EmployersModule,
