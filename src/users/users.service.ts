@@ -21,7 +21,7 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
-  private readonly logger = new Logger('UsersService'); // ✅ Logger initialized
+  private readonly logger = new Logger(UsersService.name);
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -31,24 +31,28 @@ export class UsersService {
     private jwtService: JwtService,
   ) {}
 
-  // ✅ Register JobSeeker
+  // ✅ Register JobSeeker with detailed logs
   async registerJobSeeker(
     name: string,
     email: string,
     password: string,
     phoneNumber?: string,
   ) {
-    this.logger.log(`Attempting to register jobseeker with email: ${email}`);
+    this.logger.log(`🔍 Checking if email is already in use: ${email}`);
 
     const existingUser = await this.userModel.findOne({ email });
     if (existingUser) {
-      this.logger.warn(`Registration failed: Email already in use - ${email}`);
+      this.logger.warn(
+        `❌ Registration failed: Email already in use - ${email}`,
+      );
       throw new BadRequestException('Email already in use');
     }
 
+    this.logger.log(`🔑 Hashing password for user: ${email}`);
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUserId = new Types.ObjectId();
 
+    this.logger.log(`🛠 Creating new JobSeeker user: ${email}`);
     const newUser = new this.userModel({
       _id: newUserId,
       name,
@@ -59,24 +63,26 @@ export class UsersService {
     });
 
     await newUser.save();
-    this.logger.log(`User created successfully with ID: ${newUserId}`);
+    this.logger.log(`✅ User created successfully with ID: ${newUserId}`);
 
+    this.logger.log(`🛠 Creating JobSeeker profile for user: ${newUserId}`);
     const jobSeekerProfile = new this.jobSeekerModel({
       user: newUserId,
     });
 
     await jobSeekerProfile.save();
-    this.logger.log(`JobSeeker profile created for user: ${newUserId}`);
+    this.logger.log(
+      `✅ JobSeeker profile created successfully for user: ${newUserId}`,
+    );
 
+    this.logger.log(`🔗 Linking JobSeeker profile to user: ${newUserId}`);
     newUser.jobSeekerProfile = jobSeekerProfile.id;
     await newUser.save();
 
-    this.logger.log(`JobSeeker profile linked to user: ${newUserId}`);
-
+    this.logger.log(`✅ JobSeeker profile linked to user: ${newUserId}`);
     return this.generateToken(newUser);
   }
 
-  // ✅ Register Employer
   async registerEmployer(
     name: string,
     email: string,
@@ -84,22 +90,34 @@ export class UsersService {
     phoneNumber: string,
     companyName: string,
   ) {
-    this.logger.log(`Attempting to register employer with email: ${email}`);
+    this.logger.log(`🔍 Checking if email is already in use: ${email}`);
+
+    // 🔥 Add this check
+    if (!email) {
+      this.logger.error(
+        `❌ Registration failed: Email is required but received null`,
+      );
+      throw new BadRequestException('Email is required');
+    }
 
     const existingUser = await this.userModel.findOne({ email });
     if (existingUser) {
-      this.logger.warn(`Registration failed: Email already in use - ${email}`);
+      this.logger.warn(
+        `❌ Registration failed: Email already in use - ${email}`,
+      );
       throw new BadRequestException('Email already in use');
     }
 
     if (!companyName) {
-      this.logger.warn(`Registration failed: Company name is required`);
+      this.logger.warn(`❌ Registration failed: Company name is required`);
       throw new BadRequestException('Company name is required for employers');
     }
 
+    this.logger.log(`🔑 Hashing password for employer: ${email}`);
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUserId = new Types.ObjectId();
 
+    this.logger.log(`🛠 Creating new Employer user: ${email}`);
     const newUser = new this.userModel({
       _id: newUserId,
       name,
@@ -110,7 +128,13 @@ export class UsersService {
     });
 
     await newUser.save();
-    this.logger.log(`Employer user created with ID: ${newUserId}`);
+    this.logger.log(
+      `✅ Employer user created successfully with ID: ${newUserId}`,
+    );
+
+    this.logger.log(`🛠 Creating Employer profile for user: ${newUserId}`);
+
+    // 🔥 Add an explicit email check
 
     const employerProfile = new this.employerModel({
       user: newUserId,
@@ -118,39 +142,42 @@ export class UsersService {
     });
 
     await employerProfile.save();
-    this.logger.log(`Employer profile created for user: ${newUserId}`);
+    this.logger.log(
+      `✅ Employer profile created successfully for user: ${newUserId}`,
+    );
 
+    this.logger.log(`🔗 Linking Employer profile to user: ${newUserId}`);
     newUser.employerProfile = employerProfile.id;
     await newUser.save();
 
-    this.logger.log(`Employer profile linked to user: ${newUserId}`);
-
+    this.logger.log(`✅ Employer profile linked to user: ${newUserId}`);
     return this.generateToken(newUser);
   }
 
-  // ✅ User Login
+  // ✅ User Login with detailed logs
   async login(email: string, password: string) {
-    this.logger.log(`Login attempt for email: ${email}`);
+    this.logger.log(`🔍 Checking if user exists for email: ${email}`);
 
     const user = await this.userModel.findOne({ email });
     if (!user) {
-      this.logger.warn(`Login failed: User not found - ${email}`);
+      this.logger.warn(`❌ Login failed: User not found - ${email}`);
       throw new NotFoundException('User not found');
     }
 
+    this.logger.log(`🔑 Verifying password for user: ${email}`);
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
-      this.logger.warn(`Login failed: Invalid credentials for ${email}`);
+      this.logger.warn(`❌ Login failed: Invalid credentials for ${email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    this.logger.log(`Login successful for user: ${email}`);
+    this.logger.log(`✅ Login successful for user: ${email}`);
     return this.generateToken(user);
   }
 
-  // ✅ Generate JWT Token
+  // ✅ Generate JWT Token with logs
   private generateToken(user: UserDocument) {
-    this.logger.log(`Generating JWT token for user: ${user.email}`);
+    this.logger.log(`🔑 Generating JWT token for user: ${user.email}`);
 
     const payload = {
       email: user.email,
@@ -160,7 +187,7 @@ export class UsersService {
     };
 
     const token = this.jwtService.sign(payload);
-    this.logger.log(`JWT token generated for user: ${user.email}`);
+    this.logger.log(`✅ JWT token generated for user: ${user.email}`);
 
     return {
       access_token: token,

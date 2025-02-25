@@ -12,6 +12,7 @@ import {
   Employer,
   EmployerSchema,
 } from 'src/employers/schemas/employer.schema';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import {
       { name: JobSeeker.name, schema: JobSeekerSchema },
       { name: Employer.name, schema: EmployerSchema },
     ]),
-
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: 'tomer',
       signOptions: { expiresIn: '24h' }, // ✅ Set token expiration

@@ -1,12 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { User } from '../../users/schemas/user.schema';
 
 export type EmployerDocument = Employer & Document;
 
 @Schema({ timestamps: true })
 export class Employer {
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true }) // ✅ Reference to User
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true }) // ✅ Reference to User instead of storing user details
   user: Types.ObjectId;
 
   @Prop({ required: true }) // ✅ Company Name

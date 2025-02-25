@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { User } from '../../users/schemas/user.schema';
 
 export type JobSeekerDocument = JobSeeker & Document;
 
@@ -21,7 +20,7 @@ export class JobSeeker {
   @Prop({ default: [] })
   skills?: string[];
 
-  @Prop({ default: 0 })
+  @Prop({ default: {} })
   experience?: Experience;
 }
 

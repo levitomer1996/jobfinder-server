@@ -1,3 +1,6 @@
 export default class {
-  uid: String;
+  userId: String;
+  email: String;
+  role: String;
+  name: String;
 }
