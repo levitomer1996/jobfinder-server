@@ -24,11 +24,19 @@ export class Job {
   @Prop([String])
   requiredSkills: string[];
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Employer', required: true })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Employer',
+    required: true,
+  })
   postedBy: mongoose.Types.ObjectId;
 
   @Prop({ default: 'open', enum: ['open', 'closed'] })
   status: string;
+  @Prop({ default: 0 })
+  applicants: number;
+  @Prop({ default: 0 })
+  declined: number;
 }
 
 export const JobSchema = SchemaFactory.createForClass(Job);

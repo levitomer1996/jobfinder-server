@@ -148,7 +148,6 @@ export class UsersService {
 
     this.logger.log(`🔗 Linking Employer profile to user: ${newUserId}`);
     newUser.employerProfile = employerProfile.id;
-    await newUser.save();
 
     this.logger.log(`✅ Employer profile linked to user: ${newUserId}`);
     return this.generateToken(newUser);
