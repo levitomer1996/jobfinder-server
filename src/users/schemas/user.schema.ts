@@ -5,6 +5,8 @@ export type UserDocument = User & Document;
 
 @Schema({ timestamps: true, discriminatorKey: 'role' })
 export class User {
+  @Prop({ type: Types.ObjectId, default: () => new Types.ObjectId() })
+  _id: Types.ObjectId;
   @Prop({ required: true })
   name: string;
 

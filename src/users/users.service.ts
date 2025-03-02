@@ -115,11 +115,9 @@ export class UsersService {
 
     this.logger.log(`🔑 Hashing password for employer: ${email}`);
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUserId = new Types.ObjectId();
 
     this.logger.log(`🛠 Creating new Employer user: ${email}`);
     const newUser = new this.userModel({
-      _id: newUserId,
       name,
       email,
       passwordHash: hashedPassword,
@@ -129,27 +127,27 @@ export class UsersService {
 
     await newUser.save();
     this.logger.log(
-      `✅ Employer user created successfully with ID: ${newUserId}`,
+      `✅ Employer user created successfully with ID: ${newUser._id}`,
     );
 
-    this.logger.log(`🛠 Creating Employer profile for user: ${newUserId}`);
+    this.logger.log(`🛠 Creating Employer profile for user: ${newUser._id}`);
 
     // 🔥 Add an explicit email check
 
     const employerProfile = new this.employerModel({
-      user: newUserId,
+      user: newUser._id,
       companyName,
     });
 
     await employerProfile.save();
     this.logger.log(
-      `✅ Employer profile created successfully for user: ${newUserId}`,
+      `✅ Employer profile created successfully for user: ${newUser._id}`,
     );
 
-    this.logger.log(`🔗 Linking Employer profile to user: ${newUserId}`);
+    this.logger.log(`🔗 Linking Employer profile to user: ${newUser._id}`);
     newUser.employerProfile = employerProfile.id;
 
-    this.logger.log(`✅ Employer profile linked to user: ${newUserId}`);
+    this.logger.log(`✅ Employer profile linked to user: ${newUser._id}`);
     return this.generateToken(newUser);
   }
 

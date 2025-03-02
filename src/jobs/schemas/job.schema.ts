@@ -1,11 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import mongoose from 'mongoose';
+import { Skill } from 'src/skill/schemas/skill.schema';
 
 export type JobDocument = Job & Document;
 
 @Schema({ timestamps: true })
 export class Job {
+  @Prop({ type: Types.ObjectId, default: () => new Types.ObjectId() })
+  _id: Types.ObjectId;
   @Prop({ required: true })
   title: string;
 
@@ -21,11 +24,11 @@ export class Job {
   @Prop({ required: true })
   location: string; // City, country, or remote
 
-  @Prop([String])
-  requiredSkills: string[];
+  @Prop({ default: [] })
+  requiredSkills: Skill[];
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
+    type: Types.ObjectId,
     ref: 'Employer',
     required: true,
   })
@@ -35,8 +38,6 @@ export class Job {
   status: string;
   @Prop({ default: 0 })
   applicants: number;
-  @Prop({ default: 0 })
-  declined: number;
 }
 
 export const JobSchema = SchemaFactory.createForClass(Job);

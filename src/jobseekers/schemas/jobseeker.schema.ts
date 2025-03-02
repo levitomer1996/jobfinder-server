@@ -11,6 +11,8 @@ class Experience {
 
 @Schema({ timestamps: true })
 export class JobSeeker {
+  @Prop({ type: Types.ObjectId, default: () => new Types.ObjectId() })
+  _id: Types.ObjectId;
   @Prop({ type: Types.ObjectId, ref: 'User', required: true }) // ✅ Reference to User instead of storing user details
   user: Types.ObjectId;
 

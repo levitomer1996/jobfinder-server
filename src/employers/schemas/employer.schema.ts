@@ -5,6 +5,8 @@ export type EmployerDocument = Employer & Document;
 
 @Schema({ timestamps: true })
 export class Employer {
+  @Prop({ type: Types.ObjectId, default: () => new Types.ObjectId() })
+  _id: Types.ObjectId;
   @Prop({ type: Types.ObjectId, ref: 'User', required: true }) // ✅ Reference to User instead of storing user details
   user: Types.ObjectId;
 

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Employer, EmployerDocument } from './schemas/employer.schema';
@@ -9,7 +9,7 @@ export class EmployersService {
     @InjectModel(Employer.name)
     private employerModel: Model<EmployerDocument>,
   ) {}
-
+  private readonly logger = new Logger(EmployersService.name);
   async getEmployerByUser(userId: Types.ObjectId): Promise<Employer> {
     const employer = await this.employerModel
       .findOne({ user: userId }) // ✅ Ensure the query matches ObjectId
@@ -20,5 +20,34 @@ export class EmployersService {
     }
 
     return employer;
+  }
+
+  async findEmployerByUser(userId: string): Promise<Employer> {
+    this.logger.log(`🔍 Searching for employer with user ID: ${userId}`);
+
+    // Convert userId to ObjectId for MongoDB search
+    const employer = await this.employerModel.findOne({
+      user: new Types.ObjectId(userId),
+    });
+
+    if (!employer) {
+      this.logger.warn(`❌ Employer not found for user ID: ${userId}`);
+      throw new NotFoundException(`Employer not found for user ID: ${userId}`);
+    }
+
+    this.logger.log(`✅ Employer found: ${JSON.stringify(employer)}`);
+    return employer;
+  }
+
+  async addJobToEmployerById(eid: Types.ObjectId, jid: Types.ObjectId) {
+    this.logger.log(`Searching for Employer ID - ${eid}`);
+    const e = await this.employerModel.findById(eid);
+    this.logger.log(`Found Employer ID - ${eid}`);
+    let tempSkillsArray = [...e.jobPostings, jid];
+    e.jobPostings = tempSkillsArray;
+    this.logger.log(
+      ` Job was added to Object...Trying to save new jobs list- ${eid}`,
+    );
+    await e.save();
   }
 }
