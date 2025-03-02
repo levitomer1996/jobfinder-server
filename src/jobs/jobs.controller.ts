@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Logger } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Logger, Get } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './DTO/CreateJob.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -14,5 +14,12 @@ export class JobsController {
   async createJob(@Body() createJobDto: CreateJobDto, @GetUser() user: any) {
     this.logger.log(user);
     return this.jobsService.create(createJobDto, user.userId);
+  }
+
+  @Get('getbyuser')
+  @UseGuards(JwtAuthGuard)
+  async getJobsByUser(@GetUser() user: any) {
+    this.logger.log(user);
+    return this.jobsService.getJobsByUser(user.userId);
   }
 }

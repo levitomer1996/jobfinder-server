@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -76,6 +77,41 @@ export class JobsService {
       throw new InternalServerErrorException(
         'Failed to create job. Please try again.',
       );
+    }
+  }
+
+  async getJobsByUser(userId: string): Promise<Job[]> {
+    this.logger.log(`🔍 Fetching jobs for user ID: ${userId}`);
+
+    try {
+      // ✅ Find the employer linked to this user
+      this.logger.log(`🔎 Looking up employer for user ID: ${userId}`);
+      const employer = await this.employerService.findEmployerByUser(userId);
+
+      if (!employer) {
+        this.logger.warn(`❌ No employer found for user ID: ${userId}`);
+        throw new NotFoundException(`Employer profile not found.`);
+      }
+
+      // ✅ Fetch jobs posted by this employer
+      this.logger.log(`🛠 Fetching jobs for employer ID: ${employer._id}`);
+      const jobs = await this.jobModel.find({ postedBy: employer._id });
+
+      this.logger.log(
+        `✅ Found ${jobs.length} job(s) for employer ID: ${employer._id}`,
+      );
+      return jobs;
+    } catch (error) {
+      this.logger.error(
+        `❌ Error fetching jobs for user ID: ${userId}`,
+        error.stack,
+      );
+
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(`Failed to retrieve jobs.`);
     }
   }
 }
