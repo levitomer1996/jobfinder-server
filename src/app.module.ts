@@ -10,6 +10,8 @@ import { InterviewsModule } from './interviews/interviews.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { SkillModule } from './skill/skill.module';
+import { ChatModule } from './chat/chat.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { SkillModule } from './skill/skill.module';
     InterviewsModule,
     AuthModule,
     SkillModule,
+    ChatModule,
+    UploadModule,
   ],
 })
 export class AppModule {}

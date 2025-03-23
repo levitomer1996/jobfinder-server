@@ -114,4 +114,7 @@ export class JobsService {
       throw new InternalServerErrorException(`Failed to retrieve jobs.`);
     }
   }
+  async getJobsByLocation(location: string) {
+    return await this.jobModel.find({ location });
+  }
 }

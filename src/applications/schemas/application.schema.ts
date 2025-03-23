@@ -9,7 +9,11 @@ export class Application {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Job', required: true })
   jobId: mongoose.Types.ObjectId;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'JobSeeker', required: true })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'JobSeeker',
+    required: true,
+  })
   jobSeekerId: mongoose.Types.ObjectId;
 
   @Prop()
@@ -18,7 +22,7 @@ export class Application {
   @Prop()
   coverLetter?: string;
 
-  @Prop({ default: 'pending', enum: ['pending', 'reviewed', 'interview', 'hired', 'rejected'] })
+  @Prop({ default: 'pending', enum: ['pending', 'reviewed'] })
   status: string;
 
   @Prop({ default: Date.now })
