@@ -22,8 +22,8 @@ export class JobSeeker {
   @Prop({ default: [] })
   skills?: string[];
 
-  @Prop({ default: {} })
-  experience?: Experience;
+  @Prop({ default: [] })
+  experience?: Experience[];
 }
 
 export const JobSeekerSchema = SchemaFactory.createForClass(JobSeeker);
