@@ -7,12 +7,14 @@ import { GetUser } from './Decorators/get-user.decorator';
 import Log from 'src/Helpers/Log';
 import { JobseekersService } from 'src/jobseekers/jobseekers.service';
 import { Types } from 'mongoose';
+import { EmployersService } from 'src/employers/employers.service';
 
 @Controller('users')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly jobSeekerService: JobseekersService,
+    private readonly employerService: EmployersService,
   ) {}
   logger = new Logger('User controller');
 
@@ -47,9 +49,19 @@ export class UsersController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   async getMe(@GetUser() user: User) {
-    this.logger.log(`${user._id}`);
-    const foundJobseeker =
-      await this.jobSeekerService.getJobSeekerProfileByUserId(user._id);
-    return { ...user, jobSeekerProfile: foundJobseeker };
+    this.logger.log(`${user.role}`);
+
+    if (user.role === 'jobseeker') {
+      const foundJobseeker =
+        await this.jobSeekerService.getJobSeekerProfileByUserId(user._id);
+      return { ...user, jobSeekerProfile: foundJobseeker };
+    } else if (user.role === 'employer') {
+      const foundEmployer = await this.employerService.getEmployerByUserId(
+        user._id,
+      );
+      return { ...user, employerProfile: foundEmployer };
+    } else {
+      return;
+    }
   }
 }

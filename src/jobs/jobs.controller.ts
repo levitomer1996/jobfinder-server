@@ -21,14 +21,14 @@ export class JobsController {
   @UseGuards(JwtAuthGuard)
   async createJob(@Body() createJobDto: CreateJobDto, @GetUser() user: any) {
     this.logger.log(user);
-    return this.jobsService.create(createJobDto, user.userId);
+    return this.jobsService.create(createJobDto, user._id);
   }
 
   @Get('getbyuser')
   @UseGuards(JwtAuthGuard)
   async getJobsByUser(@GetUser() user: any) {
     this.logger.log(user);
-    return this.jobsService.getJobsByUser(user.userId);
+    return this.jobsService.getJobsByUser(user._id);
   }
   @Get('bylocation')
   async getJobByLocation(@Query('q') q: string) {

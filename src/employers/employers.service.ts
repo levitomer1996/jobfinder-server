@@ -50,4 +50,23 @@ export class EmployersService {
     );
     await e.save();
   }
+
+  async getEmployerByUserId(id: any): Promise<Employer> {
+    this.logger.log(`Getting Employer for user: ${id}`);
+
+    if (!Types.ObjectId.isValid(id)) {
+      this.logger.warn(`Invalid ObjectId passed: ${id}`);
+      return null;
+    }
+
+    const objectId = typeof id === 'string' ? new Types.ObjectId(id) : id;
+
+    const employer = await this.employerModel.findOne({ user: objectId });
+
+    if (!employer) {
+      this.logger.warn(`No Employer found for user: ${id}`);
+    }
+
+    return employer;
+  }
 }

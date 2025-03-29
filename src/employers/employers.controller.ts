@@ -16,7 +16,6 @@ export class EmployersController {
   constructor(private readonly employersService: EmployersService) {}
 
   @UseGuards(JwtAuthGuard)
-  @UseGuards(AuthGuard())
   @UsePipes(ValidationPipe)
   @Get('/getbyuser') // ✅ Get Employer Profile by User
   async getEmployerByUser(@GetUser() user) {
