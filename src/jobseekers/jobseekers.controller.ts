@@ -12,7 +12,7 @@ export class JobseekersController {
   @Get('/getbyuser')
   @UseGuards(JwtAuthGuard) // ✅ Protect with authentication
   async getJobSeekerByUser(@GetUser() user: JwtPayload) {
-    this.logger.log(user.userId);
+    this.logger.log(user._id);
     return this.jobseekersService.getJobSeekerByUser(user);
     return;
   }

@@ -5,10 +5,15 @@ import { JobSeekerSignupDTO, EmployerSignupDTO } from './DTO/SignupDTO';
 import { User } from './schemas/user.schema';
 import { GetUser } from './Decorators/get-user.decorator';
 import Log from 'src/Helpers/Log';
+import { JobseekersService } from 'src/jobseekers/jobseekers.service';
+import { Types } from 'mongoose';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jobSeekerService: JobseekersService,
+  ) {}
   logger = new Logger('User controller');
 
   // ✅ Register JobSeeker
@@ -41,7 +46,10 @@ export class UsersController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  getMe(@GetUser() user: User) {
-    return user;
+  async getMe(@GetUser() user: User) {
+    this.logger.log(`${user._id}`);
+    const foundJobseeker =
+      await this.jobSeekerService.getJobSeekerProfileByUserId(user._id);
+    return { ...user, jobSeekerProfile: foundJobseeker };
   }
 }

@@ -16,8 +16,8 @@ export class JobSeeker {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true }) // ✅ Reference to User instead of storing user details
   user: Types.ObjectId;
 
-  @Prop({ required: false, default: '' }) // ✅ No need to require fields from User schema
-  resume?: string;
+  @Prop({ required: false, default: [] }) // ✅ No need to require fields from User schema
+  resume?: string[];
 
   @Prop({ default: [] })
   skills?: string[];

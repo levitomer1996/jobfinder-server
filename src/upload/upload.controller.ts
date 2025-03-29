@@ -55,7 +55,7 @@ export class UploadController {
 
     // Save to DB
     const saved = await this.uploadService.savePdfResumeMetadata(
-      user.userId,
+      user._id,
       token,
       filename,
     );

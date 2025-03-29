@@ -1,6 +1,6 @@
 export default class {
-  userId: String;
-  email: String;
-  role: String;
-  name: String;
+  _id: string;
+  email: string;
+  role: string;
+  name: string;
 }

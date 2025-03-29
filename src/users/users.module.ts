@@ -13,6 +13,7 @@ import {
   EmployerSchema,
 } from 'src/employers/schemas/employer.schema';
 import { PassportModule } from '@nestjs/passport';
+import { JobseekersService } from 'src/jobseekers/jobseekers.service';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { PassportModule } from '@nestjs/passport';
     }),
   ],
 
-  providers: [UsersService],
+  providers: [UsersService, JobseekersService],
   controllers: [UsersController],
 })
 export class UsersModule {}
