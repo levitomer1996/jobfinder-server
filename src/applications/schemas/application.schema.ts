@@ -17,7 +17,7 @@ export class Application {
   jobSeekerId: mongoose.Types.ObjectId;
 
   @Prop()
-  resume?: string;
+  resumeId?: string;
 
   @Prop()
   coverLetter?: string;

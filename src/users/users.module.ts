@@ -15,6 +15,8 @@ import {
 import { PassportModule } from '@nestjs/passport';
 import { JobseekersService } from 'src/jobseekers/jobseekers.service';
 import { EmployersService } from 'src/employers/employers.service';
+import { UploadService } from 'src/upload/upload.service';
+import { Pdf, PdfSchema } from 'src/upload/Schemas/pdf.schema';
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { EmployersService } from 'src/employers/employers.service';
       { name: User.name, schema: UserSchema },
       { name: JobSeeker.name, schema: JobSeekerSchema },
       { name: Employer.name, schema: EmployerSchema },
+      { name: Pdf.name, schema: PdfSchema },
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
@@ -30,7 +33,7 @@ import { EmployersService } from 'src/employers/employers.service';
     }),
   ],
 
-  providers: [UsersService, JobseekersService, EmployersService],
+  providers: [UsersService, JobseekersService, EmployersService, UploadService],
   controllers: [UsersController],
 })
 export class UsersModule {}

@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Job, JobDocument } from './schemas/job.schema';
 import { CreateJobDto } from './DTO/CreateJob.dto';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
@@ -114,7 +114,21 @@ export class JobsService {
       throw new InternalServerErrorException(`Failed to retrieve jobs.`);
     }
   }
+
   async getJobsByLocation(location: string) {
     return await this.jobModel.find({ location });
+  }
+
+  async addApplicationToJobByJobId(id: any, appId: any) {
+    try {
+      this.logger.log(`Adding ${appId} to job ${id}`);
+      await this.jobModel.updateOne(
+        { _id: id },
+        { $push: { applicants: appId } },
+      );
+      this.logger.log(`Added ${appId} to job ${id}`);
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 }

@@ -36,8 +36,8 @@ export class Job {
 
   @Prop({ default: 'open', enum: ['open', 'closed'] })
   status: string;
-  @Prop({ default: 0 })
-  applicants: number;
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Application' })
+  applicants: mongoose.Types.ObjectId[];
 }
 
 export const JobSchema = SchemaFactory.createForClass(Job);

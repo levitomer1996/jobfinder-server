@@ -46,4 +46,32 @@ export class UploadService {
       throw error;
     }
   }
+
+  async getResumeById(idList: string[]) {
+    try {
+      this.logger.log(`Received raw resume IDs: ${JSON.stringify(idList)}`);
+
+      // Extract just the Mongo ObjectId from the formatted strings
+      const extractedIds = idList.map((str) => {
+        const parts = str.split('_');
+        const id = parts[parts.length - 1];
+        return new Types.ObjectId(id); // Convert to ObjectId
+      });
+
+      this.logger.log(
+        `Searching for resumes with extracted IDs: ${JSON.stringify(extractedIds)}`,
+      );
+
+      const results = await this.pdfModel.find({ _id: { $in: extractedIds } });
+
+      this.logger.log(`Found ${results.length} resumes.`);
+      return results;
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch resumes. Error: ${error.message}`,
+        error.stack,
+      );
+      throw new Error('An error occurred while fetching resumes');
+    }
+  }
 }

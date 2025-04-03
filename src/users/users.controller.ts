@@ -8,12 +8,14 @@ import Log from 'src/Helpers/Log';
 import { JobseekersService } from 'src/jobseekers/jobseekers.service';
 import { Types } from 'mongoose';
 import { EmployersService } from 'src/employers/employers.service';
+import { UploadService } from 'src/upload/upload.service';
 
 @Controller('users')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly jobSeekerService: JobseekersService,
+    private readonly uploadService: UploadService,
     private readonly employerService: EmployersService,
   ) {}
   logger = new Logger('User controller');
@@ -54,7 +56,14 @@ export class UsersController {
     if (user.role === 'jobseeker') {
       const foundJobseeker =
         await this.jobSeekerService.getJobSeekerProfileByUserId(user._id);
-      return { ...user, jobSeekerProfile: foundJobseeker };
+      const foundResumes = await this.uploadService.getResumeById(
+        foundJobseeker.resume,
+      );
+      return {
+        ...user,
+        jobSeekerProfile: foundJobseeker,
+        resumes: foundResumes,
+      };
     } else if (user.role === 'employer') {
       const foundEmployer = await this.employerService.getEmployerByUserId(
         user._id,
