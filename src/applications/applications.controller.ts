@@ -16,7 +16,5 @@ export class ApplicationController {
     this.logger.log(`Payload: ${JSON.stringify(createApplicationDto)}`);
 
     return this.applicationService.create(createApplicationDto);
-
-    return;
   }
 }

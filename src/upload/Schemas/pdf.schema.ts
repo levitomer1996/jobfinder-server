@@ -17,6 +17,7 @@ export class Pdf {
 
   @Prop({ required: true })
   filename: string;
+  
   @Prop({ default: Date.now() })
   createdDate: Date;
 }

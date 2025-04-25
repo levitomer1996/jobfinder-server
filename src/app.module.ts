@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 import { SkillModule } from './skill/skill.module';
 import { ChatModule } from './chat/chat.module';
 import { UploadModule } from './upload/upload.module';
+import { CompanyModule } from './company/company.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { UploadModule } from './upload/upload.module';
     SkillModule,
     ChatModule,
     UploadModule,
+    CompanyModule,
   ],
 })
 export class AppModule {}

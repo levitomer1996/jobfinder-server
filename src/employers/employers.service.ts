@@ -10,6 +10,11 @@ export class EmployersService {
     private employerModel: Model<EmployerDocument>,
   ) {}
   private readonly logger = new Logger(EmployersService.name);
+
+  async getEmployerById(id: string): Promise<Employer> {
+    return await this.employerModel.findById(new Types.ObjectId(id));
+  }
+
   async getEmployerByUser(userId: Types.ObjectId): Promise<Employer> {
     const employer = await this.employerModel
       .findOne({ user: userId }) // ✅ Ensure the query matches ObjectId

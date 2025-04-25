@@ -4,6 +4,11 @@ import mongoose from 'mongoose';
 
 export type ChatDocument = Chat & Document;
 
+export enum ChatType {
+  SYSTEM = 'system',
+  PRIVATE = 'private',
+}
+
 @Schema({ timestamps: true })
 export class Chat {
   @Prop({
@@ -20,6 +25,13 @@ export class Chat {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Message', default: null })
   lastMessage: Types.ObjectId | null;
+
+  @Prop({
+    type: String,
+    enum: ChatType,
+    default: ChatType.PRIVATE,
+  })
+  type: ChatType;
 }
 
 export const ChatSchema = SchemaFactory.createForClass(Chat);

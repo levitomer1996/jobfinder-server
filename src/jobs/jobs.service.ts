@@ -123,7 +123,7 @@ export class JobsService {
     try {
       this.logger.log(`Adding ${appId} to job ${id}`);
       await this.jobModel.updateOne(
-        { _id: id },
+        { _id: new Types.ObjectId(id) },
         { $push: { applicants: appId } },
       );
       this.logger.log(`Added ${appId} to job ${id}`);
