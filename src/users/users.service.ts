@@ -19,6 +19,14 @@ import {
 } from '../employers/schemas/employer.schema';
 import { JwtService } from '@nestjs/jwt';
 import { CompanyService } from 'src/company/company.service';
+import { Job } from 'src/jobs/schemas/job.schema';
+import {
+  Application,
+  ApplicationDocument,
+} from 'src/applications/schemas/application.schema';
+import { ApplicationService } from 'src/applications/applications.service';
+import { JobsService } from 'src/jobs/jobs.service';
+import { JobseekersService } from 'src/jobseekers/jobseekers.service';
 
 @Injectable()
 export class UsersService {
@@ -28,8 +36,12 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(JobSeeker.name)
     private jobSeekerModel: Model<JobSeekerDocument>,
+
     @InjectModel(Employer.name) private employerModel: Model<EmployerDocument>,
     private jwtService: JwtService,
+    private applicationService: ApplicationService,
+    private jobService: JobsService,
+    private jobSeekerSevice: JobseekersService,
   ) {}
 
   // ✅ Register JobSeeker with detailed logs
@@ -196,5 +208,45 @@ export class UsersService {
         role: user.role,
       },
     };
+  }
+
+  //Functions of suggesting jobs to users
+  async makeSuggestedJobsByContentBasedFiltering(
+    user: User,
+    jobseekerId: any,
+  ): Promise<Job[]> {
+    // 1. שליפת משרות שהמשתמש הגיש אליהן
+    const appliedJobs =
+      await this.jobSeekerSevice.getAppliedJobsByJobSeekerId(jobseekerId);
+
+    // 2. בניית מפת skills לפי תדירות הופעה
+    const skillMap = new Map<string, number>();
+
+    for (const job of appliedJobs) {
+      for (const skill of job.requiredSkills || []) {
+        const id = skill._id.toString(); // הפיכת ObjectId למחרוזת
+        skillMap.set(id, (skillMap.get(id) || 0) + 1);
+      }
+    }
+
+    // 3. שליפת משרות שלא הוגשו
+    const notAppliedJobs =
+      await this.jobSeekerSevice.getNotAppliedJobsByJobSeekerId(jobseekerId);
+
+    // 4. חישוב ציון התאמה לכל משרה חדשה
+    const scoredJobs = notAppliedJobs.map((job) => {
+      const score = (job.requiredSkills || []).reduce((acc, skill) => {
+        const id = skill._id.toString();
+        return acc + (skillMap.get(id) || 0);
+      }, 0);
+      return { job, score };
+    });
+
+    // 5. מיון לפי ציון התאמה (מהגבוה לנמוך)
+    scoredJobs.sort((a, b) => b.score - a.score);
+
+    // 6. החזרת רק את המשרות עצמן, לפי הסדר
+    this.logger.log(`Suggested ${scoredJobs.map((item) => item.job)}`);
+    return scoredJobs.map((item) => item.job);
   }
 }

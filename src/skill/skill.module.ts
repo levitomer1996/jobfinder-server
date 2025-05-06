@@ -13,6 +13,6 @@ import { Skill, SkillSchema } from './schemas/skill.schema';
   ],
   controllers: [SkillController],
   providers: [SkillService],
-  exports: [SkillService],
+  exports: [SkillService, MongooseModule],
 })
 export class SkillModule {}

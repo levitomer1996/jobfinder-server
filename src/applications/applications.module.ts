@@ -26,5 +26,6 @@ import { Skill, SkillSchema } from 'src/skill/schemas/skill.schema';
   ],
   providers: [ApplicationService, JobsService, EmployersService, SkillService],
   controllers: [ApplicationController],
+  exports: [ApplicationService],
 })
 export class ApplicationsModule {}

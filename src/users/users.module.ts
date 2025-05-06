@@ -17,6 +17,16 @@ import { JobseekersService } from 'src/jobseekers/jobseekers.service';
 import { EmployersService } from 'src/employers/employers.service';
 import { UploadService } from 'src/upload/upload.service';
 import { Pdf, PdfSchema } from 'src/upload/Schemas/pdf.schema';
+import { ApplicationService } from 'src/applications/applications.service';
+import { JobsService } from 'src/jobs/jobs.service';
+import { Job, JobSchema } from 'src/jobs/schemas/job.schema';
+import {
+  Application,
+  ApplicationSchema,
+} from 'src/applications/schemas/application.schema';
+import { SkillService } from 'src/skill/skill.service';
+import { SkillModule } from 'src/skill/skill.module';
+import { Skill, SkillSchema } from 'src/skill/schemas/skill.schema';
 
 @Module({
   imports: [
@@ -25,6 +35,9 @@ import { Pdf, PdfSchema } from 'src/upload/Schemas/pdf.schema';
       { name: JobSeeker.name, schema: JobSeekerSchema },
       { name: Employer.name, schema: EmployerSchema },
       { name: Pdf.name, schema: PdfSchema },
+      { name: Job.name, schema: JobSchema },
+      { name: Application.name, schema: ApplicationSchema },
+      { name: Skill.name, schema: SkillSchema },
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
@@ -33,7 +46,15 @@ import { Pdf, PdfSchema } from 'src/upload/Schemas/pdf.schema';
     }),
   ],
 
-  providers: [UsersService, JobseekersService, EmployersService, UploadService],
+  providers: [
+    UsersService,
+    JobseekersService,
+    EmployersService,
+    UploadService,
+    ApplicationService,
+    JobsService,
+    SkillService,
+  ],
   controllers: [UsersController],
 })
 export class UsersModule {}

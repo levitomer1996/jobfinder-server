@@ -14,6 +14,10 @@ import {
 import { EmployersService } from 'src/employers/employers.service';
 import { SkillService } from 'src/skill/skill.service';
 import { JwtModule } from '@nestjs/jwt';
+import {
+  JobSeeker,
+  JobSeekerSchema,
+} from 'src/jobseekers/schemas/jobseeker.schema';
 
 @Module({
   imports: [
@@ -22,6 +26,7 @@ import { JwtModule } from '@nestjs/jwt';
       { name: User.name, schema: UserSchema },
       { name: Skill.name, schema: SkillSchema },
       { name: Employer.name, schema: EmployerSchema },
+      { name: JobSeeker.name, schema: JobSeekerSchema },
     ]),
     EmployersModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -32,5 +37,6 @@ import { JwtModule } from '@nestjs/jwt';
   ],
   providers: [JobsService, EmployersService, SkillService],
   controllers: [JobsController],
+  exports: [JobsService],
 })
 export class JobsModule {}

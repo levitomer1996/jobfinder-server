@@ -80,6 +80,12 @@ export class JobsService {
     }
   }
 
+  async getAllJobs() {
+    return await this.jobModel.find();
+  }
+  async getJobById(id: any) {
+    return await this.jobModel.findById(id);
+  }
   async getJobsByUser(userId: string): Promise<Job[]> {
     this.logger.log(`Fetching jobs for user ID: ${userId}`);
 
@@ -197,5 +203,9 @@ export class JobsService {
         'Failed to update job with application.',
       );
     }
+  }
+
+  async getAppliedJobsByUser(applicants: string): Promise<Job[]> {
+    return await this.jobModel.find({ applicants });
   }
 }

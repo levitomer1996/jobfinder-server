@@ -51,13 +51,16 @@ export class UsersController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   async getMe(@GetUser() user: User) {
-    this.logger.log(`${user.role}`);
-
     if (user.role === 'jobseeker') {
       const foundJobseeker =
         await this.jobSeekerService.getJobSeekerProfileByUserId(user._id);
       const foundResumes = await this.uploadService.getResumeById(
         foundJobseeker.resume,
+      );
+
+      await this.usersService.makeSuggestedJobsByContentBasedFiltering(
+        user,
+        foundJobseeker._id,
       );
       return {
         ...user,
