@@ -116,9 +116,10 @@ export class JobsService {
   }
 
   async getJobsByLocation(location: string) {
-    return await this.jobModel.find({ location });
+    return await this.jobModel.find({
+      location: { $regex: `^${location}$`, $options: 'i' },
+    });
   }
-
   async addApplicationToJobByJobId(id: any, appId: any) {
     try {
       this.logger.log(`Adding ${appId} to job ${id}`);
