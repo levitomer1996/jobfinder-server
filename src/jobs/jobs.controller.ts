@@ -34,4 +34,10 @@ export class JobsController {
   async getJobByLocation(@Query('q') q: string) {
     return this.jobsService.getJobsByLocation(q);
   }
+
+  @Get('getbytitle')
+async getJobByTitle(@Query('q') q: string) {
+  return this.jobsService.getJobsByTitle(q);
+}
+
 }

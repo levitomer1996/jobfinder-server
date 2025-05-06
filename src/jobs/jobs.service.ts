@@ -132,4 +132,14 @@ export class JobsService {
       this.logger.error(error);
     }
   }
+
+  // Find jobs by job title (case-insensitive match)
+async getJobsByTitle(title: string) {
+  return await this.jobModel.find({
+    jobTitle: { $regex: `^${title}$`, $options: 'i' },
+  });
+}
+
+
+
 }
