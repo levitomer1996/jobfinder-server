@@ -11,6 +11,8 @@ export class Company {
 
   @Prop()
   description?: string;
+  @Prop()
+  profileImage: string;
 
   @Prop({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

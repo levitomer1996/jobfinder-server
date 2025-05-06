@@ -14,7 +14,7 @@ export class SkillService {
     const found = await this.skillModel.find({
       name: { $regex: new RegExp(payload, 'i') },
     });
-   
+
     return found;
   }
 
@@ -54,11 +54,23 @@ export class SkillService {
     }
   }
 
-  async createMultipleSkills(skills: string): Promise<Skill[]> {
-    const skillsAsArray = splitStringByComma(skills);
-    let skillsToReturn = [];
-    for (let i = 0; i < skillsAsArray.length; i++) {
-      skillsToReturn.push(await this.createSkill(skillsAsArray[i]));
+  async createMultipleSkills(skills: string[]): Promise<Skill[]> {
+    const skillsToReturn = [];
+    for (let i = 0; i < skills.length; i++) {
+      const name = skills[i].trim();
+      this.logger.log(`Trying to find skill: ${name}`);
+
+      const foundSkill = await this.skillModel.findOne({
+        name: { $regex: `^${name}$`, $options: 'i' },
+      });
+
+      if (foundSkill) {
+        this.logger.log(`Skill "${name}" already exists`);
+        skillsToReturn.push(foundSkill);
+      } else {
+        const newSkill = await this.createSkill(name);
+        skillsToReturn.push(newSkill);
+      }
     }
     return skillsToReturn;
   }

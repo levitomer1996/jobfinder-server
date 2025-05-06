@@ -32,7 +32,6 @@ export class CreateJobDto {
   @IsNotEmpty({ message: 'Location is required' })
   location: string;
 
-  @IsString()
-  @IsOptional() // Optional field
-  requiredSkills?: string;
+  @IsString() //
+  requiredSkills: string[];
 }

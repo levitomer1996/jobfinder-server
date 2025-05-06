@@ -18,6 +18,7 @@ import {
   EmployerDocument,
 } from '../employers/schemas/employer.schema';
 import { JwtService } from '@nestjs/jwt';
+import { CompanyService } from 'src/company/company.service';
 
 @Injectable()
 export class UsersService {
