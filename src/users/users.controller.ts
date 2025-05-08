@@ -86,4 +86,12 @@ export class UsersController {
       return;
     }
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/getuserbyemployerid') // ✅ Get Employer Profile by User
+  async getUserByEmployerId(@Body() body) {
+    return await this.usersService.getUserByEmployerId(
+      new Types.ObjectId(body.id),
+    );
+  }
 }

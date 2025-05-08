@@ -3,6 +3,8 @@ import { EmployersService } from './employers.service';
 import { EmployersController } from './employers.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Employer, EmployerSchema } from './schemas/employer.schema';
+import { User, UserSchema } from 'src/users/schemas/user.schema';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [

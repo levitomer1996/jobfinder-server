@@ -56,5 +56,6 @@ import { Skill, SkillSchema } from 'src/skill/schemas/skill.schema';
     SkillService,
   ],
   controllers: [UsersController],
+  exports: [UsersService],
 })
 export class UsersModule {}

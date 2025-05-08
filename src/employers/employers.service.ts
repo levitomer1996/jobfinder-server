@@ -2,6 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Employer, EmployerDocument } from './schemas/employer.schema';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class EmployersService {

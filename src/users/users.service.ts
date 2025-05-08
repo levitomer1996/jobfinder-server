@@ -4,6 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
   Logger,
+  Type,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -248,5 +249,20 @@ export class UsersService {
     // 6. החזרת רק את המשרות עצמן, לפי הסדר
 
     return scoredJobs.map((item) => item.job);
+  }
+
+  async getUserById(userId: Types.ObjectId) {
+    return await this.userModel.findById(userId);
+  }
+  async getUserByEmployerId(empId: Types.ObjectId) {
+    this.logger.log(`ID: ${empId}`);
+    const foundEmployer = await this.employerModel.findById(empId);
+    if (foundEmployer) {
+      const foundUser = await this.getUserById(foundEmployer.user);
+      return { name: foundUser.name, email: foundUser.email };
+    } else {
+      this.logger.warn(`Employer ID was not found`);
+      return;
+    }
   }
 }
