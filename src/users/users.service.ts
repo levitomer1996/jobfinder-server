@@ -246,7 +246,7 @@ export class UsersService {
     scoredJobs.sort((a, b) => b.score - a.score);
 
     // 6. החזרת רק את המשרות עצמן, לפי הסדר
-    this.logger.log(`Suggested ${scoredJobs.map((item) => item.job)}`);
+
     return scoredJobs.map((item) => item.job);
   }
 }

@@ -74,6 +74,7 @@ export class JobseekersService {
     for (let i = 0; i < applications.length; i++) {
       arrToReturn.push(await this.jobService.getJobById(applications[i].jobId));
     }
+
     return arrToReturn;
   }
 

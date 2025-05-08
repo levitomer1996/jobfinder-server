@@ -54,18 +54,28 @@ export class UsersController {
     if (user.role === 'jobseeker') {
       const foundJobseeker =
         await this.jobSeekerService.getJobSeekerProfileByUserId(user._id);
+
       const foundResumes = await this.uploadService.getResumeById(
         foundJobseeker.resume,
       );
 
-      await this.usersService.makeSuggestedJobsByContentBasedFiltering(
-        user,
-        foundJobseeker._id,
-      );
+      const appliedJobs =
+        await this.jobSeekerService.getAppliedJobsByJobSeekerId(
+          foundJobseeker._id, // ✅ Fixed line
+        );
+
+      const suggestedJobs =
+        await this.usersService.makeSuggestedJobsByContentBasedFiltering(
+          user,
+          foundJobseeker._id,
+        );
+
       return {
         ...user,
         jobSeekerProfile: foundJobseeker,
         resumes: foundResumes,
+        suggestedJobs,
+        appliedJobs,
       };
     } else if (user.role === 'employer') {
       const foundEmployer = await this.employerService.getEmployerByUserId(
