@@ -211,30 +211,30 @@ export class UsersService {
     };
   }
 
-  //Functions of suggesting jobs to users
+  // Suggests jobs to users based on content-based filtering
   async makeSuggestedJobsByContentBasedFiltering(
     user: User,
     jobseekerId: any,
   ): Promise<Job[]> {
-    // 1. שליפת משרות שהמשתמש הגיש אליהן
+    // 1. Fetch jobs the user has already applied to
     const appliedJobs =
       await this.jobSeekerSevice.getAppliedJobsByJobSeekerId(jobseekerId);
 
-    // 2. בניית מפת skills לפי תדירות הופעה
+    // 2. Build a map of skills with their frequency
     const skillMap = new Map<string, number>();
 
     for (const job of appliedJobs) {
       for (const skill of job.requiredSkills || []) {
-        const id = skill._id.toString(); // הפיכת ObjectId למחרוזת
+        const id = skill._id.toString(); // Convert ObjectId to string
         skillMap.set(id, (skillMap.get(id) || 0) + 1);
       }
     }
 
-    // 3. שליפת משרות שלא הוגשו
+    // 3. Fetch jobs the user has not applied to
     const notAppliedJobs =
       await this.jobSeekerSevice.getNotAppliedJobsByJobSeekerId(jobseekerId);
 
-    // 4. חישוב ציון התאמה לכל משרה חדשה
+    // 4. Calculate a match score for each new job
     const scoredJobs = notAppliedJobs.map((job) => {
       const score = (job.requiredSkills || []).reduce((acc, skill) => {
         const id = skill._id.toString();
@@ -243,17 +243,17 @@ export class UsersService {
       return { job, score };
     });
 
-    // 5. מיון לפי ציון התאמה (מהגבוה לנמוך)
+    // 5. Sort by match score (highest to lowest)
     scoredJobs.sort((a, b) => b.score - a.score);
 
-    // 6. החזרת רק את המשרות עצמן, לפי הסדר
-
+    // 6. Return only the job objects, sorted
     return scoredJobs.map((item) => item.job);
   }
 
   async getUserById(userId: Types.ObjectId) {
     return await this.userModel.findById(userId);
   }
+
   async getUserByEmployerId(empId: Types.ObjectId) {
     const foundEmployer = await this.employerModel.findById(empId);
     if (foundEmployer) {
