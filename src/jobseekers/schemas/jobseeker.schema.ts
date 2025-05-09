@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { Skill } from 'src/skill/schemas/skill.schema';
 
 export type JobSeekerDocument = JobSeeker & Document;
 
@@ -19,8 +20,8 @@ export class JobSeeker {
   @Prop({ required: false, default: [] }) // ✅ No need to require fields from User schema
   resume?: string[];
 
-  @Prop({ default: [] })
-  skills?: string[];
+  @Prop({ type: Types.ObjectId, ref: 'Skill', required: true, default: [] })
+  skills?: Types.ObjectId[];
 
   @Prop({ default: [] })
   experience?: Experience[];

@@ -8,6 +8,8 @@ import JwtPayload from 'src/auth/JwtPayload';
 import { ApplicationService } from 'src/applications/applications.service';
 import { Job } from 'src/jobs/schemas/job.schema';
 import { JobsService } from 'src/jobs/jobs.service';
+import { SkillService } from 'src/skill/skill.service';
+import { Skill } from 'src/skill/schemas/skill.schema';
 
 @Injectable()
 export class JobseekersService {
@@ -16,6 +18,7 @@ export class JobseekersService {
     private jobSeekerModel: Model<JobSeekerDocument>,
     private applicationService: ApplicationService,
     private jobService: JobsService,
+    private skillService: SkillService,
   ) {}
   logger = new Logger('Jobseeker-service');
 
@@ -95,5 +98,44 @@ export class JobseekersService {
     );
 
     return notAppliedJobs;
+  }
+
+  async addSkillToJobSeeker(
+    jobseekerId: Types.ObjectId,
+    skillNames: string[],
+  ): Promise<JobSeeker> {
+    console.log(
+      `📥 Received request to add skills to JobSeeker ${jobseekerId}`,
+    );
+    console.log(`🔎 Skill names to add:`, skillNames);
+
+    const foundSkills =
+      await this.skillService.createMultipleSkills(skillNames);
+    console.log(
+      `✅ Created/Retrieved Skills:`,
+      foundSkills.map((s) => ({ _id: s._id, name: s.name })),
+    );
+
+    const skillIds = foundSkills.map((s) => s._id);
+    const updatedJobSeeker = await this.jobSeekerModel.findByIdAndUpdate(
+      jobseekerId,
+      { $push: { skills: { $each: skillIds } } }, // 💡 safer for multiple pushes
+      { new: true },
+    );
+
+    if (!updatedJobSeeker) {
+      console.warn(`❌ JobSeeker with ID ${jobseekerId} not found`);
+    } else {
+      console.log(`✅ Updated JobSeeker ${jobseekerId} with new skills.`);
+    }
+
+    return updatedJobSeeker;
+  }
+  async getSkillsByJobSeekerID(jobseekerId: Types.ObjectId): Promise<Skill[]> {
+    const foundJobSeeker = await this.jobSeekerModel.findById(jobseekerId);
+
+    return await this.skillService.findMultipleSkillsByIds(
+      foundJobSeeker.skills.map((s) => s._id),
+    );
   }
 }

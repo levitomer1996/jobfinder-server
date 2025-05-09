@@ -6,7 +6,7 @@ export class SkillController {
   constructor(private skillService: SkillService) {}
 
   @Get('regexsearch')
-  findSkillByRegexSearch(@Query('q') query: string) {
-    return this.skillService.findSkillByRegexSearch(query);
+  async findSkillByRegexSearch(@Query('q') query: string) {
+    return await this.skillService.findSkillByRegexSearch(query);
   }
 }

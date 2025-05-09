@@ -9,6 +9,7 @@ import { JobseekersService } from 'src/jobseekers/jobseekers.service';
 import { Types } from 'mongoose';
 import { EmployersService } from 'src/employers/employers.service';
 import { UploadService } from 'src/upload/upload.service';
+import { Skill } from 'src/skill/schemas/skill.schema';
 
 @Controller('users')
 export class UsersController {

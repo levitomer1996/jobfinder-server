@@ -4,7 +4,6 @@ import {
   NotFoundException,
   UnauthorizedException,
   Logger,
-  Type,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -19,12 +18,9 @@ import {
   EmployerDocument,
 } from '../employers/schemas/employer.schema';
 import { JwtService } from '@nestjs/jwt';
-import { CompanyService } from 'src/company/company.service';
+
 import { Job } from 'src/jobs/schemas/job.schema';
-import {
-  Application,
-  ApplicationDocument,
-} from 'src/applications/schemas/application.schema';
+
 import { ApplicationService } from 'src/applications/applications.service';
 import { JobsService } from 'src/jobs/jobs.service';
 import { JobseekersService } from 'src/jobseekers/jobseekers.service';

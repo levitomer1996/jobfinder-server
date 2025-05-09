@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { JobSeekerDocument } from 'src/jobseekers/schemas/jobseeker.schema';
 import { Skill } from './schemas/skill.schema';
 import splitStringByComma from 'src/Helpers/splitStringByComma';
@@ -73,5 +73,8 @@ export class SkillService {
       }
     }
     return skillsToReturn;
+  }
+  async findMultipleSkillsByIds(skillsIds: Types.ObjectId[]) {
+    return await this.skillModel.find({ _id: { $in: skillsIds } });
   }
 }

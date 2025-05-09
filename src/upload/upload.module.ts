@@ -13,11 +13,13 @@ import {
 } from 'src/applications/schemas/application.schema';
 import { ApplicationsModule } from 'src/applications/applications.module';
 import { JobsModule } from 'src/jobs/jobs.module';
+import { SkillModule } from 'src/skill/skill.module';
 
 @Module({
   imports: [
     ApplicationsModule,
     JobsModule,
+    SkillModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: 'tomer',
