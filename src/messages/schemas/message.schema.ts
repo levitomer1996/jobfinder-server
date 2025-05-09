@@ -6,8 +6,9 @@ export type MessageDocument = Message & Document;
 
 @Schema({ timestamps: true })
 export class Message {
-  @Prop({ type: Types.ObjectId, efault: () => new Types.ObjectId() })
+  @Prop({ type: Types.ObjectId, default: () => new Types.ObjectId() })
   _id: Types.ObjectId;
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
   senderId: mongoose.Types.ObjectId;
 
@@ -17,8 +18,8 @@ export class Message {
   @Prop({ required: true })
   content: string;
 
-  @Prop({ default: 'sent', enum: ['sent', 'read'] })
-  status: string;
+  @Prop({ type: String, enum: ['sent', 'read'], default: 'sent' })
+  status: 'sent' | 'read';
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

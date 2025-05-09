@@ -255,11 +255,15 @@ export class UsersService {
     return await this.userModel.findById(userId);
   }
   async getUserByEmployerId(empId: Types.ObjectId) {
-    this.logger.log(`ID: ${empId}`);
     const foundEmployer = await this.employerModel.findById(empId);
     if (foundEmployer) {
       const foundUser = await this.getUserById(foundEmployer.user);
-      return { name: foundUser.name, email: foundUser.email };
+
+      return {
+        name: foundUser.name,
+        email: foundUser.email,
+        _id: foundUser._id,
+      };
     } else {
       this.logger.warn(`Employer ID was not found`);
       return;
