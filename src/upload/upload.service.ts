@@ -8,6 +8,8 @@ import {
   JobSeekerDocument,
 } from 'src/jobseekers/schemas/jobseeker.schema';
 import { JobseekersService } from 'src/jobseekers/jobseekers.service';
+import { JOB_SEEKER_PROFILE_ACTIONS } from 'src/jobseekers/DTO/JOB_SEEKER_PROFILE_ACTIONS.enum';
+import { ResumeBase } from './Schemas/resume.abstractschema';
 
 @Injectable()
 export class UploadService {
@@ -47,7 +49,7 @@ export class UploadService {
     }
   }
 
-  async getResumeById(idList: string[]) {
+  async getResumeById(idList: string[]): Promise<ResumeBase[]> {
     try {
       this.logger.log(`Received raw resume IDs: ${JSON.stringify(idList)}`);
 
@@ -73,5 +75,36 @@ export class UploadService {
       );
       throw new Error('An error occurred while fetching resumes');
     }
+  }
+
+  async deleteReseumeForUser(
+    jobSeekerId: Types.ObjectId,
+    resumeId: Types.ObjectId,
+  ): Promise<ResumeBase[]> {
+    this.logger.log(`Starting resume deletion for jobSeekerId: ${jobSeekerId}`);
+    this.logger.log(`Attempting to remove resumeId: ${resumeId}`);
+
+    const j = await this.jobseekerSerivce.editJobSeeker(
+      jobSeekerId,
+      JOB_SEEKER_PROFILE_ACTIONS.RESUME_REMOVE,
+      resumeId,
+    );
+
+    if (!j) {
+      this.logger.error(`JobSeeker with ID ${jobSeekerId} not found.`);
+      throw new Error(`JobSeeker with ID ${jobSeekerId} not found.`);
+    }
+
+    this.logger.log(
+      `Resume removed. Updated resume list: ${JSON.stringify(j.resume)}`,
+    );
+
+    const updatedResumes = await this.getResumeById(j.resume);
+
+    this.logger.log(
+      `Resolved updated resumes: ${JSON.stringify(updatedResumes)}`,
+    );
+
+    return updatedResumes;
   }
 }

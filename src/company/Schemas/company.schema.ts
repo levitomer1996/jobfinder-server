@@ -11,6 +11,7 @@ export class Company {
 
   @Prop()
   description?: string;
+  
   @Prop()
   profileImage: string;
 

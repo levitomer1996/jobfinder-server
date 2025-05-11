@@ -10,6 +10,7 @@ import { Job } from 'src/jobs/schemas/job.schema';
 import { JobsService } from 'src/jobs/jobs.service';
 import { SkillService } from 'src/skill/skill.service';
 import { Skill } from 'src/skill/schemas/skill.schema';
+import { JOB_SEEKER_PROFILE_ACTIONS } from './DTO/JOB_SEEKER_PROFILE_ACTIONS.enum';
 
 @Injectable()
 export class JobseekersService {
@@ -137,5 +138,50 @@ export class JobseekersService {
     return await this.skillService.findMultipleSkillsByIds(
       foundJobSeeker.skills.map((s) => s._id),
     );
+  }
+  async editJobSeeker(
+    id: Types.ObjectId,
+    type: JOB_SEEKER_PROFILE_ACTIONS,
+    content: any, // this is the resumeId string only (e.g., "6820b500ba7ab1e3877c72e8")
+  ): Promise<JobSeeker> {
+    this.logger.log(`editJobSeeker called with type: ${type} and id: ${id}`);
+
+    try {
+      switch (type) {
+        case JOB_SEEKER_PROFILE_ACTIONS.RESUME_REMOVE:
+          this.logger.log(`Removing resume ending with ID: ${content}`);
+
+          const updatedJobSeeker = await this.jobSeekerModel.findByIdAndUpdate(
+            id,
+            {
+              $pull: {
+                resume: {
+                  $regex: `${content}$`, // ends with the ID
+                },
+              },
+            },
+            { new: true },
+          );
+
+          if (!updatedJobSeeker) {
+            this.logger.error(`JobSeeker with ID ${id} not found.`);
+            throw new Error('JobSeeker not found');
+          }
+
+          this.logger.log(
+            `Updated resume array: ${JSON.stringify(updatedJobSeeker.resume)}`,
+          );
+          return updatedJobSeeker;
+
+        default:
+          throw new Error(`Unsupported action type: ${type}`);
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to edit JobSeeker [${type}]`,
+        error.stack || error.message,
+      );
+      throw error;
+    }
   }
 }

@@ -6,6 +6,8 @@ import {
   UseInterceptors,
   Body,
   UseGuards,
+  Delete,
+  Logger,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -15,9 +17,12 @@ import { UploadService } from './upload.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { GetUser } from 'src/users/Decorators/get-user.decorator';
 import JwtPayload from 'src/auth/JwtPayload';
+import { User } from 'src/users/schemas/user.schema';
+import { Types } from 'mongoose';
 
 @Controller('upload')
 export class UploadController {
+  private readonly logger = new Logger(UploadController.name);
   constructor(private readonly uploadService: UploadService) {}
 
   @Post('/pdf/resume')
@@ -65,5 +70,28 @@ export class UploadController {
       file,
       saved,
     };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/pdf/deleteresume')
+  async deleteReseume(
+    @GetUser() user: User,
+    @Body()
+    body: {
+      resumeId: string;
+      jobseekerId: string;
+      userId: string;
+    },
+  ) {
+    const { resumeId, jobseekerId, userId } = body;
+
+    if (user._id.toString() !== userId) {
+      throw new Error('Unauthorized request');
+    }
+
+    return await this.uploadService.deleteReseumeForUser(
+      new Types.ObjectId(jobseekerId),
+      new Types.ObjectId(resumeId),
+    );
   }
 }
