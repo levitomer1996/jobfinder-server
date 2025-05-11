@@ -3,12 +3,13 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { CreateChatDto } from './dto/create-chat.dto';
-import { UpdateChatDto } from './dto/update-chat.dto';
+
 import { InjectModel } from '@nestjs/mongoose';
 import { Chat, ChatDocument } from './schemas/chat.schema';
 import { Model, Types } from 'mongoose';
 import { MessagesService } from 'src/messages/messages.service';
+import { UsersService } from 'src/users/users.service';
+import GetChatsByUserId from './dto/GetChatsByUserId.dto';
 
 @Injectable()
 export class ChatService {
@@ -17,6 +18,7 @@ export class ChatService {
     @InjectModel(Chat.name)
     private chatModel: Model<ChatDocument>,
     private messageService: MessagesService,
+    private userService: UsersService,
   ) {}
 
   async create(
@@ -77,6 +79,93 @@ export class ChatService {
         error.stack,
       );
       throw new InternalServerErrorException('Failed to retrieve messages');
+    }
+  }
+  async getChatsByUserId(userId: Types.ObjectId): Promise<GetChatsByUserId[]> {
+    try {
+      const foundChats = await this.chatModel
+        .find({ participants: { $in: [userId] } })
+        .populate('participants')
+        .populate('lastMessage')
+        .populate('messages')
+        .exec();
+
+      const arrayToReturn: GetChatsByUserId[] = [];
+
+      for (let i = 0; i < foundChats.length; i++) {
+        const chat = foundChats[i];
+
+        const otherParticipant = chat.participants.find(
+          (p) => p._id.toString() !== userId.toString(),
+        );
+
+        if (!otherParticipant) {
+          this.logger.warn(`No other participant found in chat ${chat._id}`);
+          continue;
+        }
+
+        const foundUser = await this.userService.getUserById(
+          otherParticipant._id,
+        );
+
+        arrayToReturn.push({
+          otherParticipant: {
+            _id: foundUser._id,
+            name: foundUser.name,
+            email: foundUser.email,
+          },
+          chat,
+        });
+      }
+
+      return arrayToReturn;
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch chats for user ${userId}`,
+        error.stack || error.message,
+      );
+      throw new InternalServerErrorException('Could not fetch chats');
+    }
+  }
+  async sendMessage(
+    senderId: Types.ObjectId,
+    receiverId: Types.ObjectId,
+    chatId: Types.ObjectId,
+    content: string,
+  ) {
+    try {
+      this.logger.log(
+        `Creating message from ${senderId} to ${receiverId} in chat ${chatId}`,
+      );
+
+      const message = await this.messageService.createMessage(
+        senderId,
+        receiverId,
+        content,
+      );
+
+      const updatedChat = await this.chatModel.findByIdAndUpdate(
+        chatId,
+        {
+          $push: { messages: message._id },
+          lastMessage: message._id,
+        },
+        { new: true },
+      );
+
+      if (!updatedChat) {
+        this.logger.warn(`Chat ${chatId} not found.`);
+        throw new Error(`Chat with ID ${chatId} not found.`);
+      }
+
+      this.logger.log(`Message ${message._id} added to chat ${chatId}`);
+      return message;
+    } catch (error) {
+      this.logger.error(
+        `Failed to send message: ${error.message}`,
+        error.stack,
+      );
+      throw new Error('Failed to send message');
     }
   }
 }
