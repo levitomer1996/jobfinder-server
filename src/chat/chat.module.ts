@@ -8,6 +8,7 @@ import { PassportModule } from '@nestjs/passport';
 import { Message, MessageSchema } from 'src/messages/schemas/message.schema';
 import { MessagesModule } from 'src/messages/messages.module';
 import { UsersModule } from 'src/users/users.module';
+import { ChatGateway } from './chat.gateway';
 
 @Module({
   imports: [
@@ -23,6 +24,6 @@ import { UsersModule } from 'src/users/users.module';
   ],
 
   controllers: [ChatController],
-  providers: [ChatService],
+  providers: [ChatService, ChatGateway],
 })
 export class ChatModule {}
