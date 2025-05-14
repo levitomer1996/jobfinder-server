@@ -6,6 +6,7 @@ import { CreateApplicationDto } from './dto/create-application.dto';
 import { Application, ApplicationDocument } from './schemas/application.schema';
 import { Job, JobDocument } from 'src/jobs/schemas/job.schema';
 import { JobsService } from 'src/jobs/jobs.service';
+import { App } from 'supertest/types';
 
 @Injectable()
 export class ApplicationService {
@@ -48,5 +49,8 @@ export class ApplicationService {
     return this.applicationModel.find({
       jobSeekerId: { $ne: objId },
     });
+  }
+  async getApplicationsByJobId(jobId: Types.ObjectId): Promise<Application[]> {
+    return await this.applicationModel.find({ jobId });
   }
 }

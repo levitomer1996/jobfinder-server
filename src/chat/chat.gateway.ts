@@ -54,4 +54,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayInit {
     this.logger.log(`Emitting message to room ${chatId}`);
     this.server.to(chatId).emit('newMessage', message);
   }
+
+  @SubscribeMessage('typing')
+  handleTyping(
+    @MessageBody() data: { chatId: string; from: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { chatId, from } = data;
+
+    // Broadcast "typing" event to everyone else in the room
+    client.to(chatId).emit('typing', { chatId, from });
+
+    this.logger.log(`User ${from} is typing in chat ${chatId}`);
+  }
 }

@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Get, UseGuards, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  UseGuards,
+  Logger,
+  NotFoundException,
+  Param,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JobSeekerSignupDTO, EmployerSignupDTO } from './DTO/SignupDTO';
@@ -94,5 +103,16 @@ export class UsersController {
     return await this.usersService.getUserByEmployerId(
       new Types.ObjectId(body.id),
     );
+  }
+  @UseGuards(JwtAuthGuard)
+  @Get('/getapplicantsbyjobid/:id')
+  async getApplicantsByJobId(@Param('id') id: string) {
+    try {
+      const jobId = new Types.ObjectId(id);
+      const applicants = await this.usersService.getApliedUsersByJobId(jobId);
+      return applicants;
+    } catch (error) {
+      throw new NotFoundException('Invalid job ID or job not found.');
+    }
   }
 }

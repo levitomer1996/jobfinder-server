@@ -265,4 +265,42 @@ export class UsersService {
       return;
     }
   }
+  async getApliedUsersByJobId(jobId: Types.ObjectId): Promise<User[]> {
+    this.logger.log(`🔍 Fetching applications for job ID: ${jobId}`);
+
+    const foundApplications =
+      await this.applicationService.getApplicationsByJobId(jobId);
+    this.logger.log(`📄 Found ${foundApplications.length} applications`);
+
+    const jobSeekerIds = foundApplications
+      .map((app) => app.jobSeekerId?.toString())
+      .filter(Boolean);
+    this.logger.log(`🧾 Extracted JobSeeker IDs: ${jobSeekerIds}`);
+
+    const uniqueJobSeekerIds = [...new Set(jobSeekerIds)];
+    this.logger.log(`🔑 Unique JobSeeker IDs: ${uniqueJobSeekerIds}`);
+
+    const jobSeekers = await this.jobSeekerModel.find({
+      _id: { $in: uniqueJobSeekerIds },
+    });
+
+    this.logger.log(`📦 Found ${jobSeekers.length} JobSeeker documents`);
+    jobSeekers.forEach((js) => {
+      this.logger.log(`➡️ JobSeeker ${js._id} → User: ${js.user}`);
+    });
+
+    const userIds = jobSeekers
+      .filter((js) => js.user)
+      .map((js) => js.user.toString());
+
+    const uniqueUserIds = [...new Set(userIds)];
+    this.logger.log(`✅ Mapped to User IDs: ${uniqueUserIds}`);
+
+    const users = await this.userModel.find({
+      _id: { $in: uniqueUserIds },
+    });
+
+    this.logger.log(`👥 Retrieved ${users.length} user profiles`);
+    return users;
+  }
 }
