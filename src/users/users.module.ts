@@ -27,6 +27,7 @@ import {
 import { SkillService } from 'src/skill/skill.service';
 import { SkillModule } from 'src/skill/skill.module';
 import { Skill, SkillSchema } from 'src/skill/schemas/skill.schema';
+import { GoogleStrategy } from 'src/auth/google.strategy';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { Skill, SkillSchema } from 'src/skill/schemas/skill.schema';
     ApplicationService,
     JobsService,
     SkillService,
+    GoogleStrategy,
   ],
   controllers: [UsersController],
   exports: [UsersService],

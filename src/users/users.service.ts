@@ -24,6 +24,14 @@ import { Job } from 'src/jobs/schemas/job.schema';
 import { ApplicationService } from 'src/applications/applications.service';
 import { JobsService } from 'src/jobs/jobs.service';
 import { JobseekersService } from 'src/jobseekers/jobseekers.service';
+import { GoogleProfileData } from './DTO/GoogleProfileData.dto';
+
+export interface GoogleAuthPayload {
+  email: string;
+  name: string;
+  role?: 'jobseeker' | 'employer';
+  companyName?: string;
+}
 
 @Injectable()
 export class UsersService {
@@ -41,7 +49,6 @@ export class UsersService {
     private jobSeekerSevice: JobseekersService,
   ) {}
 
-  // ✅ Register JobSeeker with detailed logs
   async registerJobSeeker(
     name: string,
     email: string,
@@ -102,7 +109,6 @@ export class UsersService {
   ) {
     this.logger.log(`🔍 Checking if email is already in use: ${email}`);
 
-    // 🔥 Add this check
     if (!email) {
       this.logger.error(
         `❌ Registration failed: Email is required but received null`,
@@ -142,8 +148,6 @@ export class UsersService {
 
     this.logger.log(`🛠 Creating Employer profile for user: ${newUser._id}`);
 
-    // 🔥 Add an explicit email check
-
     const employerProfile = new this.employerModel({
       user: newUser._id,
       companyName,
@@ -156,12 +160,12 @@ export class UsersService {
 
     this.logger.log(`🔗 Linking Employer profile to user: ${newUser._id}`);
     newUser.employerProfile = employerProfile.id;
+    await newUser.save();
 
     this.logger.log(`✅ Employer profile linked to user: ${newUser._id}`);
     return this.generateToken(newUser);
   }
 
-  // ✅ User Login with detailed logs
   async login(email: string, password: string) {
     this.logger.log(`🔍 Checking if user exists for email: ${email}`);
 
@@ -182,7 +186,6 @@ export class UsersService {
     return this.generateToken(user);
   }
 
-  // ✅ Generate JWT Token with logs
   private generateToken(user: UserDocument) {
     this.logger.log(`🔑 Generating JWT token for user: ${user.email}`);
 
@@ -207,30 +210,25 @@ export class UsersService {
     };
   }
 
-  // Suggests jobs to users based on content-based filtering
   async makeSuggestedJobsByContentBasedFiltering(
     user: User,
     jobseekerId: any,
   ): Promise<Job[]> {
-    // 1. Fetch jobs the user has already applied to
     const appliedJobs =
       await this.jobSeekerSevice.getAppliedJobsByJobSeekerId(jobseekerId);
 
-    // 2. Build a map of skills with their frequency
     const skillMap = new Map<string, number>();
 
     for (const job of appliedJobs) {
       for (const skill of job.requiredSkills || []) {
-        const id = skill._id.toString(); // Convert ObjectId to string
+        const id = skill._id.toString();
         skillMap.set(id, (skillMap.get(id) || 0) + 1);
       }
     }
 
-    // 3. Fetch jobs the user has not applied to
     const notAppliedJobs =
       await this.jobSeekerSevice.getNotAppliedJobsByJobSeekerId(jobseekerId);
 
-    // 4. Calculate a match score for each new job
     const scoredJobs = notAppliedJobs.map((job) => {
       const score = (job.requiredSkills || []).reduce((acc, skill) => {
         const id = skill._id.toString();
@@ -239,10 +237,8 @@ export class UsersService {
       return { job, score };
     });
 
-    // 5. Sort by match score (highest to lowest)
     scoredJobs.sort((a, b) => b.score - a.score);
 
-    // 6. Return only the job objects, sorted
     return scoredJobs.map((item) => item.job);
   }
 
@@ -265,42 +261,73 @@ export class UsersService {
       return;
     }
   }
+
   async getApliedUsersByJobId(jobId: Types.ObjectId): Promise<User[]> {
-    this.logger.log(`🔍 Fetching applications for job ID: ${jobId}`);
+    this.logger.log(`Fetching applications for job ID: ${jobId}`);
 
     const foundApplications =
       await this.applicationService.getApplicationsByJobId(jobId);
-    this.logger.log(`📄 Found ${foundApplications.length} applications`);
+    this.logger.log(`Found ${foundApplications.length} applications`);
 
-    const jobSeekerIds = foundApplications
-      .map((app) => app.jobSeekerId?.toString())
-      .filter(Boolean);
-    this.logger.log(`🧾 Extracted JobSeeker IDs: ${jobSeekerIds}`);
+    const jobSeekerIds = foundApplications.map((app) => app.jobSeekerId);
+    this.logger.log(`Extracted JobSeeker IDs: ${jobSeekerIds}`);
 
-    const uniqueJobSeekerIds = [...new Set(jobSeekerIds)];
-    this.logger.log(`🔑 Unique JobSeeker IDs: ${uniqueJobSeekerIds}`);
+    const uniqueJobSeekerIds = [
+      ...new Set(jobSeekerIds.map((id) => id.toString())),
+    ];
+    this.logger.log(`Unique JobSeeker IDs: ${uniqueJobSeekerIds}`);
 
     const jobSeekers = await this.jobSeekerModel.find({
       _id: { $in: uniqueJobSeekerIds },
     });
 
-    this.logger.log(`📦 Found ${jobSeekers.length} JobSeeker documents`);
-    jobSeekers.forEach((js) => {
-      this.logger.log(`➡️ JobSeeker ${js._id} → User: ${js.user}`);
-    });
-
-    const userIds = jobSeekers
-      .filter((js) => js.user)
-      .map((js) => js.user.toString());
-
+    const userIds = jobSeekers.map((js) => js.user.toString());
     const uniqueUserIds = [...new Set(userIds)];
-    this.logger.log(`✅ Mapped to User IDs: ${uniqueUserIds}`);
+
+    this.logger.log(`Mapped to User IDs: ${uniqueUserIds}`);
 
     const users = await this.userModel.find({
       _id: { $in: uniqueUserIds },
     });
 
-    this.logger.log(`👥 Retrieved ${users.length} user profiles`);
+    this.logger.log(`Retrieved ${users.length} user profiles`);
     return users;
+  }
+
+  async googleLoginOrRegister(user: GoogleAuthPayload) {
+    this.logger.log(`Google user arrived ${user}`);
+    const role = user.role || 'jobseeker';
+
+    let existing = await this.userModel.findOne({ email: user.email });
+    if (!existing) {
+      existing = new this.userModel({
+        name: user.name,
+        email: user.email,
+        role,
+      });
+      await existing.save();
+
+      if (role === 'jobseeker') {
+        const js = new this.jobSeekerModel({ user: existing._id });
+        await js.save();
+        existing.jobSeekerProfile = js._id;
+      } else if (role === 'employer') {
+        if (!user.companyName) {
+          throw new BadRequestException(
+            'Company name is required for employers',
+          );
+        }
+        const emp = new this.employerModel({
+          user: existing._id,
+          companyName: user.companyName,
+        });
+        await emp.save();
+        existing.employerProfile = emp._id;
+      }
+
+      await existing.save();
+    }
+
+    return this.generateToken(existing).access_token;
   }
 }

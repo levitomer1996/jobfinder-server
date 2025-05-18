@@ -7,14 +7,15 @@ export type UserDocument = User & Document;
 export class User {
   @Prop({ type: Types.ObjectId, default: () => new Types.ObjectId() })
   _id: Types.ObjectId;
+
   @Prop({ required: true })
   name: string;
 
   @Prop({ required: true, unique: true })
   email: string;
 
-  @Prop({ required: true })
-  passwordHash: string;
+  @Prop({ required: false }) // ✅ Make optional
+  passwordHash?: string;
 
   @Prop()
   phoneNumber?: string;
@@ -23,10 +24,13 @@ export class User {
   role: string;
 
   @Prop({ type: Types.ObjectId, ref: 'JobSeeker', required: false })
-  jobSeekerProfile?: Types.ObjectId; // ✅ Reference to JobSeeker Schema
+  jobSeekerProfile?: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'Employer', required: false })
-  employerProfile?: Types.ObjectId; // ✅ Reference to Employer Schema
+  employerProfile?: Types.ObjectId;
+
+  @Prop()
+  googleId?: string; // ✅ Add this to identify Google-authenticated users
 
   @Prop({ default: Date.now })
   createdAt: Date;

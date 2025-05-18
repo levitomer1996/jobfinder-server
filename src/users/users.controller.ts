@@ -7,30 +7,32 @@ import {
   Logger,
   NotFoundException,
   Param,
+  Req,
+  Res,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { GoogleAuthPayload, UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JobSeekerSignupDTO, EmployerSignupDTO } from './DTO/SignupDTO';
 import { User } from './schemas/user.schema';
 import { GetUser } from './Decorators/get-user.decorator';
-import Log from 'src/Helpers/Log';
 import { JobseekersService } from 'src/jobseekers/jobseekers.service';
 import { Types } from 'mongoose';
 import { EmployersService } from 'src/employers/employers.service';
 import { UploadService } from 'src/upload/upload.service';
-import { Skill } from 'src/skill/schemas/skill.schema';
+import { AuthGuard } from '@nestjs/passport';
+import { Response, Request } from 'express'; // ✅ make sure you import this
 
 @Controller('users')
 export class UsersController {
+  private readonly logger = new Logger('UserController');
+
   constructor(
     private readonly usersService: UsersService,
     private readonly jobSeekerService: JobseekersService,
     private readonly uploadService: UploadService,
     private readonly employerService: EmployersService,
   ) {}
-  logger = new Logger('User controller');
 
-  // ✅ Register JobSeeker
   @Post('register/jobseeker')
   async registerJobSeeker(@Body() jobSeekerDTO: JobSeekerSignupDTO) {
     return this.usersService.registerJobSeeker(
@@ -41,7 +43,6 @@ export class UsersController {
     );
   }
 
-  // ✅ Register Employer
   @Post('register/employer')
   async registerEmployer(@Body() employerDTO: EmployerSignupDTO) {
     return this.usersService.registerEmployer(
@@ -71,7 +72,7 @@ export class UsersController {
 
       const appliedJobs =
         await this.jobSeekerService.getAppliedJobsByJobSeekerId(
-          foundJobseeker._id, // ✅ Fixed line
+          foundJobseeker._id,
         );
 
       const suggestedJobs =
@@ -98,21 +99,40 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('/getuserbyemployerid') // ✅ Get Employer Profile by User
+  @Post('/getuserbyemployerid')
   async getUserByEmployerId(@Body() body) {
     return await this.usersService.getUserByEmployerId(
       new Types.ObjectId(body.id),
     );
   }
+
   @UseGuards(JwtAuthGuard)
   @Get('/getapplicantsbyjobid/:id')
   async getApplicantsByJobId(@Param('id') id: string) {
     try {
       const jobId = new Types.ObjectId(id);
-      const applicants = await this.usersService.getApliedUsersByJobId(jobId);
-      return applicants;
-    } catch (error) {
+      return await this.usersService.getApliedUsersByJobId(jobId);
+    } catch {
       throw new NotFoundException('Invalid job ID or job not found.');
     }
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() {
+    // Redirects to Google - handled by Passport
+  }
+
+  @Get('google/redirect')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(
+    @Req() req: Request,
+    @Res({ passthrough: false }) res: Response,
+  ) {
+    const user = req.user as GoogleAuthPayload;
+
+    const token = await this.usersService.googleLoginOrRegister(user);
+
+    res.redirect(`http://localhost:3000/oauth2callback?token=${token}`);
   }
 }
