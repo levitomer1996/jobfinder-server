@@ -122,7 +122,8 @@ export class UploadController {
 
   @Get('/profile-image-url/:userId')
   async getProfileImageUrl(@Param('userId') userId: string) {
-    const url = await this.uploadService.getProfileImageByUserId(userId);
+    const id = new Types.ObjectId(userId);
+    const url = await this.uploadService.getProfileImageByUserId(id);
     if (!url) {
       throw new NotFoundException('Profile image not found');
     }

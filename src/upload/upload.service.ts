@@ -173,7 +173,9 @@ export class UploadService {
     }
   }
 
-  async getProfileImageByUserId(userId: string): Promise<string | null> {
+  async getProfileImageByUserId(
+    userId: Types.ObjectId,
+  ): Promise<string | null> {
     try {
       this.logger.log(`Fetching profile image for user: ${userId}`);
 

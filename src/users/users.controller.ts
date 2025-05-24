@@ -81,6 +81,9 @@ export class UsersController {
           user,
           foundJobseeker._id,
         );
+      const profileImageUrl = await this.uploadService.getProfileImageByUserId(
+        user._id,
+      );
 
       return {
         ...user,
@@ -88,6 +91,7 @@ export class UsersController {
         resumes: foundResumes,
         suggestedJobs,
         appliedJobs,
+        profileImageUrl,
       };
     } else if (user.role === 'employer') {
       const foundEmployer = await this.employerService.getEmployerByUserId(
