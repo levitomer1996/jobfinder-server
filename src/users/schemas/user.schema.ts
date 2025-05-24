@@ -14,7 +14,7 @@ export class User {
   @Prop({ required: true, unique: true })
   email: string;
 
-  @Prop({ required: false }) // ✅ Make optional
+  @Prop({ required: false })
   passwordHash?: string;
 
   @Prop()
@@ -30,13 +30,17 @@ export class User {
   employerProfile?: Types.ObjectId;
 
   @Prop()
-  googleId?: string; // ✅ Add this to identify Google-authenticated users
+  googleId?: string;
 
   @Prop({ default: Date.now })
   createdAt: Date;
 
   @Prop()
   lastLogin?: Date;
+
+  // ✅ New field for profile image URL
+  @Prop()
+  profileImageUrl?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

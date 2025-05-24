@@ -28,6 +28,10 @@ import { SkillService } from 'src/skill/skill.service';
 import { SkillModule } from 'src/skill/skill.module';
 import { Skill, SkillSchema } from 'src/skill/schemas/skill.schema';
 import { GoogleStrategy } from 'src/auth/google.strategy';
+import {
+  ProfileImage,
+  ProfileImageSchema,
+} from 'src/upload/Schemas/profileimage.schema';
 
 @Module({
   imports: [
@@ -36,6 +40,7 @@ import { GoogleStrategy } from 'src/auth/google.strategy';
       { name: JobSeeker.name, schema: JobSeekerSchema },
       { name: Employer.name, schema: EmployerSchema },
       { name: Pdf.name, schema: PdfSchema },
+      { name: ProfileImage.name, schema: ProfileImageSchema },
       { name: Job.name, schema: JobSchema },
       { name: Application.name, schema: ApplicationSchema },
       { name: Skill.name, schema: SkillSchema },

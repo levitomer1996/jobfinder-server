@@ -8,6 +8,9 @@ import {
   UseGuards,
   Delete,
   Logger,
+  Get,
+  Param,
+  NotFoundException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -93,5 +96,36 @@ export class UploadController {
       new Types.ObjectId(jobseekerId),
       new Types.ObjectId(resumeId),
     );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/profile-image')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadProfileImage(
+    @UploadedFile() file: Express.Multer.File,
+    @GetUser() user: JwtPayload,
+  ) {
+    const userId = user._id;
+
+    if (!file) {
+      throw new Error('No file uploaded');
+    }
+
+    // Save image to disk and update user + metadata collection
+    const imageUrl = await this.uploadService.uploadProfileImage(userId, file);
+
+    return {
+      message: 'Profile image uploaded successfully',
+      url: imageUrl,
+    };
+  }
+
+  @Get('/profile-image-url/:userId')
+  async getProfileImageUrl(@Param('userId') userId: string) {
+    const url = await this.uploadService.getProfileImageByUserId(userId);
+    if (!url) {
+      throw new NotFoundException('Profile image not found');
+    }
+    return { url };
   }
 }

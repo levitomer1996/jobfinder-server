@@ -28,6 +28,7 @@ export class UsersController {
 
   constructor(
     private readonly usersService: UsersService,
+
     private readonly jobSeekerService: JobseekersService,
     private readonly uploadService: UploadService,
     private readonly employerService: EmployersService,
