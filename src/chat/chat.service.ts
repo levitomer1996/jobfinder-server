@@ -1,4 +1,6 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -18,6 +20,7 @@ export class ChatService {
     @InjectModel(Chat.name)
     private chatModel: Model<ChatDocument>,
     private messageService: MessagesService,
+    @Inject(forwardRef(() => UsersService))
     private userService: UsersService,
   ) {}
 
@@ -85,6 +88,7 @@ export class ChatService {
     try {
       const foundChats = await this.chatModel
         .find({ participants: { $in: [userId] } })
+        .sort({ updatedAt: -1 }) // ✅ Most recently updated first
         .populate('participants')
         .populate('lastMessage')
         .populate('messages')
@@ -107,12 +111,19 @@ export class ChatService {
         const foundUser = await this.userService.getUserById(
           otherParticipant._id,
         );
+        const check = {
+          _id: foundUser._id,
+          name: foundUser.name,
+          email: foundUser.email,
+          profileImageUrl: foundUser.profileImageUrl,
+        };
 
         arrayToReturn.push({
           otherParticipant: {
             _id: foundUser._id,
             name: foundUser.name,
             email: foundUser.email,
+            profileImageUrl: foundUser.profileImageUrl,
           },
           chat,
         });
@@ -127,6 +138,7 @@ export class ChatService {
       throw new InternalServerErrorException('Could not fetch chats');
     }
   }
+
   async sendMessage(
     senderId: Types.ObjectId,
     receiverId: Types.ObjectId,
@@ -167,5 +179,26 @@ export class ChatService {
       );
       throw new Error('Failed to send message');
     }
+  }
+  async markMessagesAsRead(messageIds: Types.ObjectId[]) {
+    return await this.messageService.markMessageAsRead(messageIds);
+  }
+  async getUnreadedChatByUserId(userId: Types.ObjectId): Promise<Chat[]> {
+    // Step 1: Find all chats where the user participates
+    const chats = await this.chatModel
+      .find({ participants: userId })
+      .populate('lastMessage');
+
+    // Step 2: Filter chats where the last message is from another user and is still 'sent'
+    const unreadChats = chats.filter((chat) => {
+      const lastMessage = chat.lastMessage as any;
+      return (
+        lastMessage &&
+        lastMessage.status === 'sent' &&
+        lastMessage.senderId.toString() !== userId.toString()
+      );
+    });
+
+    return unreadChats;
   }
 }

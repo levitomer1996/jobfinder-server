@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -32,6 +32,7 @@ import {
   ProfileImage,
   ProfileImageSchema,
 } from 'src/upload/Schemas/profileimage.schema';
+import { ChatModule } from 'src/chat/chat.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import {
       secret: 'tomer',
       signOptions: { expiresIn: '24h' }, // ✅ Set token expiration
     }),
+    forwardRef(() => ChatModule),
   ],
 
   providers: [

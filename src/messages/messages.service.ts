@@ -6,6 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Message, MessageDocument } from './schemas/message.schema';
+import { MessageToEdit } from './dto/MessageToEdit.dto';
 
 @Injectable()
 export class MessagesService {
@@ -15,7 +16,9 @@ export class MessagesService {
     @InjectModel(Message.name)
     private messageModel: Model<MessageDocument>,
   ) {}
-
+  async getMessageById(messageId: Types.ObjectId) {
+    return await this.messageModel.findById(messageId);
+  }
   async createMessage(
     senderId: Types.ObjectId,
     receiverId: Types.ObjectId,
@@ -57,6 +60,25 @@ export class MessagesService {
     } catch (error) {
       this.logger.error('Error fetching messages', error.stack);
       throw new InternalServerErrorException('Failed to fetch messages');
+    }
+  }
+  async markMessageAsRead(messagesIds: Types.ObjectId[]): Promise<number> {
+    try {
+      this.logger.log(messagesIds);
+      const objectIds = messagesIds.map((id) =>
+        typeof id === 'string' ? new Types.ObjectId(id) : id,
+      );
+
+      const result = await this.messageModel.updateMany(
+        { _id: { $in: objectIds } },
+        { $set: { status: 'read' } },
+      );
+
+      this.logger.log(`Marked ${result.modifiedCount} messages as read`);
+      return result.modifiedCount;
+    } catch (error) {
+      this.logger.error('Error marking messages as read', error.stack);
+      throw new InternalServerErrorException('Failed to mark messages as read');
     }
   }
 }

@@ -5,7 +5,12 @@ import { User } from 'src/users/schemas/user.schema';
 
 class GetChatsByUserId {
   chat: Chat; // ✅ singular and matches returned object
-  otherParticipant: { _id: Types.ObjectId; name: string; email: string };
+  otherParticipant: {
+    _id: Types.ObjectId;
+    name: string;
+    email: string;
+    profileImageUrl: string;
+  };
 }
 
 export default GetChatsByUserId;

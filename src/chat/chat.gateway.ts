@@ -10,6 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { Logger } from '@nestjs/common';
+import { Types } from 'mongoose';
 
 @WebSocketGateway({ cors: true })
 export class ChatGateway implements OnGatewayConnection, OnGatewayInit {
@@ -66,5 +67,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayInit {
     client.to(chatId).emit('typing', { chatId, from });
 
     this.logger.log(`User ${from} is typing in chat ${chatId}`);
+  }
+  @SubscribeMessage('markRead')
+  async handleMarkRead(
+    @MessageBody() data: { chatId: string; messageIds: Types.ObjectId[] },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { chatId, messageIds } = data;
+    this.logger.log(`Marking messages as read in chat ${chatId}`);
+
+    const updatedIds = await this.chatService.markMessagesAsRead(messageIds);
+
+    // Notify the room (or specific client) that messages were marked as read
+    this.server.to(chatId).emit('messagesMarkedRead', updatedIds);
   }
 }

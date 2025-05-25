@@ -84,7 +84,10 @@ export class UsersController {
       const profileImageUrl = await this.uploadService.getProfileImageByUserId(
         user._id,
       );
-
+      const unreadedChats = await this.usersService.getUserUndreadedChats(
+        user._id,
+      );
+      const chats = await this.usersService.getUsersChats(user._id);
       return {
         ...user,
         jobSeekerProfile: foundJobseeker,
@@ -92,6 +95,8 @@ export class UsersController {
         suggestedJobs,
         appliedJobs,
         profileImageUrl,
+        chats,
+        unreadedChats,
       };
     } else if (user.role === 'employer') {
       const foundEmployer = await this.employerService.getEmployerByUserId(

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { ChatController } from './chat.controller';
 import { Chat, ChatSchema } from './schemas/chat.schema';
@@ -15,7 +15,8 @@ import { ChatGateway } from './chat.gateway';
     MongooseModule.forFeature([{ name: Chat.name, schema: ChatSchema }]),
     MongooseModule.forFeature([{ name: Message.name, schema: MessageSchema }]),
     MessagesModule,
-    UsersModule,
+    forwardRef(() => UsersModule),
+
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: 'tomer',
@@ -25,5 +26,6 @@ import { ChatGateway } from './chat.gateway';
 
   controllers: [ChatController],
   providers: [ChatService, ChatGateway],
+  exports: [ChatService],
 })
 export class ChatModule {}

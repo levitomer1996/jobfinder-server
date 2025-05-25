@@ -25,6 +25,7 @@ import { ApplicationService } from 'src/applications/applications.service';
 import { JobsService } from 'src/jobs/jobs.service';
 import { JobseekersService } from 'src/jobseekers/jobseekers.service';
 import { GoogleProfileData } from './DTO/GoogleProfileData.dto';
+import { ChatService } from 'src/chat/chat.service';
 
 export interface GoogleAuthPayload {
   email: string;
@@ -47,6 +48,7 @@ export class UsersService {
     private applicationService: ApplicationService,
     private jobService: JobsService,
     private jobSeekerSevice: JobseekersService,
+    private chatService: ChatService,
   ) {}
 
   async registerJobSeeker(
@@ -329,5 +331,12 @@ export class UsersService {
     }
 
     return this.generateToken(existing).access_token;
+  }
+
+  async getUserUndreadedChats(userId: Types.ObjectId) {
+    return await this.chatService.getUnreadedChatByUserId(userId);
+  }
+  async getUsersChats(userId: Types.ObjectId) {
+    return this.chatService.getChatsByUserId(userId);
   }
 }
