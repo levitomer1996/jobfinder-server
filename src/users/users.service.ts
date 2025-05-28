@@ -26,6 +26,8 @@ import { JobsService } from 'src/jobs/jobs.service';
 import { JobseekersService } from 'src/jobseekers/jobseekers.service';
 import { GoogleProfileData } from './DTO/GoogleProfileData.dto';
 import { ChatService } from 'src/chat/chat.service';
+import { CreateEmployerDto } from './DTO/SignupDTO';
+import { CompanyService } from 'src/company/company.service';
 
 export interface GoogleAuthPayload {
   email: string;
@@ -49,6 +51,7 @@ export class UsersService {
     private jobService: JobsService,
     private jobSeekerSevice: JobseekersService,
     private chatService: ChatService,
+    private companyService: CompanyService,
   ) {}
 
   async registerJobSeeker(
@@ -102,39 +105,30 @@ export class UsersService {
     return this.generateToken(newUser);
   }
 
-  async registerEmployer(
-    name: string,
-    email: string,
-    password: string,
-    phoneNumber: string,
-    companyName: string,
-  ) {
-    this.logger.log(`🔍 Checking if email is already in use: ${email}`);
+  async registerEmployer(dto: CreateEmployerDto) {
+    const { name, email, password, phoneNumber, company } = dto;
 
+    this.logger.log(`🔍 Checking if email is already in use: ${email}`);
     if (!email) {
-      this.logger.error(
-        `❌ Registration failed: Email is required but received null`,
-      );
+      this.logger.error(`❌ Registration failed: Email is required`);
       throw new BadRequestException('Email is required');
     }
 
     const existingUser = await this.userModel.findOne({ email });
     if (existingUser) {
-      this.logger.warn(
-        `❌ Registration failed: Email already in use - ${email}`,
-      );
+      this.logger.warn(`❌ Email already in use - ${email}`);
       throw new BadRequestException('Email already in use');
     }
 
-    if (!companyName) {
-      this.logger.warn(`❌ Registration failed: Company name is required`);
-      throw new BadRequestException('Company name is required for employers');
+    if (!company) {
+      this.logger.warn(`❌ Registration failed: Company info is missing`);
+      throw new BadRequestException('Company information is required');
     }
 
-    this.logger.log(`🔑 Hashing password for employer: ${email}`);
+    this.logger.log(`🔑 Hashing password`);
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    this.logger.log(`🛠 Creating new Employer user: ${email}`);
+    this.logger.log(`🛠 Creating user document`);
     const newUser = new this.userModel({
       name,
       email,
@@ -142,29 +136,59 @@ export class UsersService {
       role: 'employer',
       phoneNumber,
     });
-
     await newUser.save();
-    this.logger.log(
-      `✅ Employer user created successfully with ID: ${newUser._id}`,
-    );
 
-    this.logger.log(`🛠 Creating Employer profile for user: ${newUser._id}`);
+    let companyDoc;
 
+    if (company.found === true) {
+      this.logger.log(
+        `🔍 Fetching existing company by ID: ${company.companyId}`,
+      );
+      companyDoc = await this.companyService.findCompanyById(company.companyId);
+
+      if (!companyDoc) {
+        throw new BadRequestException('Company not found');
+      }
+    } else {
+      const { name: companyName, description, location } = company;
+      this.logger.log(`🏗 Creating new company: ${companyName}`);
+
+      companyDoc = await this.companyService.createCompany({
+        name: companyName,
+        description,
+        location,
+      });
+    }
+
+    this.logger.log(`🛠 Creating Employer profile`);
     const employerProfile = new this.employerModel({
       user: newUser._id,
-      companyName,
+      company: companyDoc._id,
     });
-
     await employerProfile.save();
-    this.logger.log(
-      `✅ Employer profile created successfully for user: ${newUser._id}`,
-    );
 
-    this.logger.log(`🔗 Linking Employer profile to user: ${newUser._id}`);
-    newUser.employerProfile = employerProfile.id;
+    this.logger.log(`🔗 Linking employer profile to user`);
+    newUser.employerProfile = employerProfile._id;
     await newUser.save();
 
-    this.logger.log(`✅ Employer profile linked to user: ${newUser._id}`);
+    this.logger.log(
+      `Adding employer ${employerProfile._id} to new comapny - ${companyDoc._id}`,
+    );
+    await this.companyService.addEmployerToCompany(
+      companyDoc._id,
+      employerProfile._id,
+    );
+    this.logger.log(
+      `Added successfuly employer ${employerProfile._id} to new comapny - ${companyDoc._id}`,
+    );
+
+    this.logger.log(`➕ Adding employer to company's recruiters`);
+    await this.companyService.addEmployerToCompany(
+      companyDoc._id,
+      employerProfile._id,
+    );
+
+    this.logger.log(`✅ Employer registration completed`);
     return this.generateToken(newUser);
   }
 

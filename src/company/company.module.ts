@@ -10,5 +10,6 @@ import { Module } from '@nestjs/common';
   ],
   controllers: [CompanyController],
   providers: [CompanyService],
+  exports: [CompanyService],
 })
 export class CompanyModule {}

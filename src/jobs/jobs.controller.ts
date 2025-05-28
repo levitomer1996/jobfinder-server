@@ -6,11 +6,13 @@ import {
   Logger,
   Get,
   Query,
+  Param,
 } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './DTO/CreateJob.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { GetUser } from 'src/users/Decorators/get-user.decorator';
+import { Types } from 'mongoose';
 
 @Controller('jobs')
 export class JobsController {
@@ -52,5 +54,9 @@ export class JobsController {
       `Searching jobs by title="${title}" and location="${location}"`,
     );
     return await this.jobsService.getJobsByTitleAndLocation(title, location);
+  }
+  @Get(':id')
+  async getJobById(@Param('id') id: string) {
+    return this.jobsService.getJobById(new Types.ObjectId(id));
   }
 }

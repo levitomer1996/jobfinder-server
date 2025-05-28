@@ -11,15 +11,15 @@ export class Company {
 
   @Prop()
   description?: string;
-  
+
   @Prop()
   profileImage: string;
 
   @Prop({
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Employer' }],
     default: [],
   })
-  recruiters: Types.ObjectId[];
+  recruiters: Types.ObjectId[]; // refers to Employer IDs
 }
 
 export const CompanySchema = SchemaFactory.createForClass(Company);

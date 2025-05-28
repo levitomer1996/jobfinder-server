@@ -1,4 +1,5 @@
 import { IsString, IsOptional, IsArray, IsMongoId } from 'class-validator';
+import { Types } from 'mongoose';
 
 export class CreateCompanyDto {
   @IsString()
@@ -15,5 +16,5 @@ export class CreateCompanyDto {
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  recruiters?: string[];
+  recruiters?: Types.ObjectId[];
 }

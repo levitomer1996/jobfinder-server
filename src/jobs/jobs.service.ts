@@ -83,7 +83,7 @@ export class JobsService {
   async getAllJobs() {
     return await this.jobModel.find();
   }
-  async getJobById(id: any) {
+  async getJobById(id: Types.ObjectId) {
     return await this.jobModel.findById(id);
   }
   async getJobsByUser(userId: string): Promise<Job[]> {

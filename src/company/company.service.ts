@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Company, CompanyDocument } from './schemas/company.schema';
 import { CreateCompanyDto } from './dto/create-company.dto';
 
@@ -25,5 +25,19 @@ export class CompanyService {
   }
   async findCompanyByName(name: string): Promise<CompanyDocument> {
     return await this.companyModel.findOne({ name });
+  }
+
+  async addEmployerToCompany(
+    companyId: Types.ObjectId,
+    employerId: Types.ObjectId,
+  ): Promise<CompanyDocument> {
+    return await this.companyModel.findByIdAndUpdate(
+      companyId,
+      { $addToSet: { recruiters: employerId } },
+      { new: true },
+    );
+  }
+  async findCompanyById(id: string): Promise<CompanyDocument> {
+    return this.companyModel.findById(id);
   }
 }

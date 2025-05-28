@@ -33,9 +33,12 @@ import {
   ProfileImageSchema,
 } from 'src/upload/Schemas/profileimage.schema';
 import { ChatModule } from 'src/chat/chat.module';
+import { Company, CompanySchema } from 'src/company/schemas/company.schema';
+import { CompanyModule } from 'src/company/company.module';
 
 @Module({
   imports: [
+    CompanyModule,
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: JobSeeker.name, schema: JobSeekerSchema },
@@ -45,6 +48,7 @@ import { ChatModule } from 'src/chat/chat.module';
       { name: Job.name, schema: JobSchema },
       { name: Application.name, schema: ApplicationSchema },
       { name: Skill.name, schema: SkillSchema },
+      { name: Company.name, schema: CompanySchema },
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({

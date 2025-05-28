@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { GoogleAuthPayload, UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { JobSeekerSignupDTO, EmployerSignupDTO } from './DTO/SignupDTO';
+import { JobSeekerSignupDTO, CreateEmployerDto } from './DTO/SignupDTO';
 import { User } from './schemas/user.schema';
 import { GetUser } from './Decorators/get-user.decorator';
 import { JobseekersService } from 'src/jobseekers/jobseekers.service';
@@ -45,14 +45,8 @@ export class UsersController {
   }
 
   @Post('register/employer')
-  async registerEmployer(@Body() employerDTO: EmployerSignupDTO) {
-    return this.usersService.registerEmployer(
-      employerDTO.name,
-      employerDTO.email,
-      employerDTO.password,
-      employerDTO.phoneNumber,
-      employerDTO.companyName,
-    );
+  async registerEmployer(@Body() employerDto: CreateEmployerDto) {
+    return this.usersService.registerEmployer(employerDto);
   }
 
   @Post('signin')

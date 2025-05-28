@@ -7,19 +7,20 @@ export type EmployerDocument = Employer & Document;
 export class Employer {
   @Prop({ type: Types.ObjectId, default: () => new Types.ObjectId() })
   _id: Types.ObjectId;
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true }) // ✅ Reference to User instead of storing user details
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   user: Types.ObjectId;
 
-  @Prop({ required: true }) // ✅ Company Name
-  companyName: string;
+  @Prop({ type: Types.ObjectId, ref: 'Company', required: true }) // ✅ Reference by ID
+  company: Types.ObjectId;
 
-  @Prop({ required: false }) // ✅ Company Website (Optional)
+  @Prop()
   website?: string;
 
-  @Prop({ default: [] }) // ✅ Job Postings (Array of Job IDs)
+  @Prop({ type: [Types.ObjectId], default: [] })
   jobPostings?: Types.ObjectId[];
 
-  @Prop({ default: [] }) // ✅ Reviews Received (Array of Review IDs)
+  @Prop({ type: [Types.ObjectId], default: [] })
   reviews?: Types.ObjectId[];
 }
 
