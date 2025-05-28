@@ -6,7 +6,7 @@ export type CompanyDocument = Company & Document;
 
 @Schema({ timestamps: true })
 export class Company {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   name: string;
 
   @Prop()
@@ -19,7 +19,7 @@ export class Company {
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Employer' }],
     default: [],
   })
-  recruiters: Types.ObjectId[]; // refers to Employer IDs
+  recruiters: Types.ObjectId[];
 }
 
 export const CompanySchema = SchemaFactory.createForClass(Company);

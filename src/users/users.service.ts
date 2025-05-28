@@ -151,13 +151,25 @@ export class UsersService {
       }
     } else {
       const { name: companyName, description, location } = company;
-      this.logger.log(`🏗 Creating new company: ${companyName}`);
 
-      companyDoc = await this.companyService.createCompany({
-        name: companyName,
-        description,
-        location,
-      });
+      // 🔁 Double-check in case frontend gave wrong `found: false`
+      this.logger.log(
+        `🔍 Double-checking if company already exists: ${companyName}`,
+      );
+      const existingCompany =
+        await this.companyService.findCompanyByName(companyName);
+
+      if (existingCompany) {
+        this.logger.warn(`⚠️ Company already exists on server: ${companyName}`);
+        companyDoc = existingCompany;
+      } else {
+        this.logger.log(`🏗 Creating new company: ${companyName}`);
+        companyDoc = await this.companyService.createCompany({
+          name: companyName,
+          description,
+          location,
+        });
+      }
     }
 
     this.logger.log(`🛠 Creating Employer profile`);
@@ -172,17 +184,8 @@ export class UsersService {
     await newUser.save();
 
     this.logger.log(
-      `Adding employer ${employerProfile._id} to new comapny - ${companyDoc._id}`,
+      `➕ Adding employer ${employerProfile._id} to company ${companyDoc._id}`,
     );
-    await this.companyService.addEmployerToCompany(
-      companyDoc._id,
-      employerProfile._id,
-    );
-    this.logger.log(
-      `Added successfuly employer ${employerProfile._id} to new comapny - ${companyDoc._id}`,
-    );
-
-    this.logger.log(`➕ Adding employer to company's recruiters`);
     await this.companyService.addEmployerToCompany(
       companyDoc._id,
       employerProfile._id,
