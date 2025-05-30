@@ -21,6 +21,7 @@ import {
 import { EmployersModule } from 'src/employers/employers.module';
 import { Skill, SkillSchema } from 'src/skill/schemas/skill.schema';
 import { SkillModule } from 'src/skill/skill.module';
+import { CompanyModule } from 'src/company/company.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { SkillModule } from 'src/skill/skill.module';
     }),
     EmployersModule,
     SkillModule,
+    CompanyModule,
   ],
   providers: [JobseekersService, ApplicationService, JobsService],
   controllers: [JobseekersController],

@@ -41,4 +41,9 @@ export class CompanyService {
   async findCompanyById(id: string): Promise<CompanyDocument> {
     return this.companyModel.findById(id);
   }
+  async findCompanyByEmployer(empId: Types.ObjectId) {
+    return await this.companyModel.findOne({
+      recruiters: empId,
+    });
+  }
 }

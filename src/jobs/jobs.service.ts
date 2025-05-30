@@ -16,6 +16,7 @@ import {
 } from 'src/employers/schemas/employer.schema';
 import { EmployersService } from 'src/employers/employers.service';
 import { SkillService } from 'src/skill/skill.service';
+import { CompanyService } from 'src/company/company.service';
 
 @Injectable()
 export class JobsService {
@@ -24,6 +25,7 @@ export class JobsService {
     @InjectModel(Employer.name) private employerModel: Model<EmployerDocument>,
     private employerService: EmployersService,
     private skillService: SkillService,
+    private comapnyService: CompanyService,
   ) {}
 
   private readonly logger = new Logger(JobsService.name);
@@ -34,6 +36,9 @@ export class JobsService {
     try {
       this.logger.log(`Looking up employer for user ID: ${userId}`);
       const employer = await this.employerService.findEmployerByUser(userId);
+      const company = await this.comapnyService.findCompanyByEmployer(
+        employer._id,
+      );
 
       if (!employer) {
         this.logger.warn(`No employer found for user ID: ${userId}`);
@@ -51,6 +56,7 @@ export class JobsService {
       const newJob = new this.jobModel({
         ...createJobDto,
         postedBy: employer._id,
+        companyId: company._id,
       });
 
       newJob.requiredSkills = requiredSkillsToPush;
@@ -86,6 +92,7 @@ export class JobsService {
   async getJobById(id: Types.ObjectId) {
     return await this.jobModel.findById(id);
   }
+
   async getJobsByUser(userId: string): Promise<Job[]> {
     this.logger.log(`Fetching jobs for user ID: ${userId}`);
 

@@ -18,6 +18,7 @@ import {
   JobSeeker,
   JobSeekerSchema,
 } from 'src/jobseekers/schemas/jobseeker.schema';
+import { CompanyModule } from 'src/company/company.module'; // ✅ Import CompanyModule (do NOT import service directly)
 
 @Module({
   imports: [
@@ -29,13 +30,20 @@ import {
       { name: JobSeeker.name, schema: JobSeekerSchema },
     ]),
     EmployersModule,
+    CompanyModule, // ✅ Correct import here
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: 'tomer',
-      signOptions: { expiresIn: '24h' }, // ✅ Set token expiration
+      signOptions: { expiresIn: '24h' },
     }),
+    CompanyModule,
   ],
-  providers: [JobsService, EmployersService, SkillService],
+  providers: [
+    JobsService,
+    EmployersService,
+    SkillService,
+    // ❌ REMOVE: CompanyService
+  ],
   controllers: [JobsController],
   exports: [JobsService],
 })

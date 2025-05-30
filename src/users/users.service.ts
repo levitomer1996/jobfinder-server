@@ -298,25 +298,29 @@ export class UsersService {
       await this.applicationService.getApplicationsByJobId(jobId);
     this.logger.log(`Found ${foundApplications.length} applications`);
 
-    const jobSeekerIds = foundApplications.map((app) => app.jobSeekerId);
-    this.logger.log(`Extracted JobSeeker IDs: ${jobSeekerIds}`);
+    const jobSeekerIds = foundApplications
+      .map((app) => app.jobSeekerId)
+      .filter((id): id is Types.ObjectId => !!id);
+    this.logger.log(`Extracted JobSeeker IDs: ${jobSeekerIds.length}`);
 
     const uniqueJobSeekerIds = [
       ...new Set(jobSeekerIds.map((id) => id.toString())),
     ];
-    this.logger.log(`Unique JobSeeker IDs: ${uniqueJobSeekerIds}`);
+    this.logger.log(`Unique JobSeeker IDs: ${uniqueJobSeekerIds.length}`);
 
     const jobSeekers = await this.jobSeekerModel.find({
-      _id: { $in: uniqueJobSeekerIds },
+      _id: { $in: uniqueJobSeekerIds.map((id) => new Types.ObjectId(id)) },
     });
+    this.logger.log(`Fetched ${jobSeekers.length} JobSeekers`);
 
-    const userIds = jobSeekers.map((js) => js.user.toString());
+    const userIds = jobSeekers
+      .map((js) => js.user?.toString())
+      .filter((id): id is string => !!id);
     const uniqueUserIds = [...new Set(userIds)];
-
-    this.logger.log(`Mapped to User IDs: ${uniqueUserIds}`);
+    this.logger.log(`Mapped to User IDs: ${uniqueUserIds.length}`);
 
     const users = await this.userModel.find({
-      _id: { $in: uniqueUserIds },
+      _id: { $in: uniqueUserIds.map((id) => new Types.ObjectId(id)) },
     });
 
     this.logger.log(`Retrieved ${users.length} user profiles`);

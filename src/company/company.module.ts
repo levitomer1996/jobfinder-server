@@ -1,8 +1,8 @@
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Company, CompanySchema } from './schemas/company.schema'; // adjust the path
 import { CompanyController } from './company.controller';
 import { CompanyService } from './company.service';
-import { Module } from '@nestjs/common';
+import { Company, CompanySchema } from './schemas/company.schema'; // ✅ Make sure the path is correct
 
 @Module({
   imports: [
@@ -10,6 +10,6 @@ import { Module } from '@nestjs/common';
   ],
   controllers: [CompanyController],
   providers: [CompanyService],
-  exports: [CompanyService],
+  exports: [CompanyService], // ✅ Export for use in other modules
 })
 export class CompanyModule {}

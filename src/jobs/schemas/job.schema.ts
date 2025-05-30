@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import mongoose from 'mongoose';
+import { Company } from 'src/company/schemas/company.schema';
 import { Skill } from 'src/skill/schemas/skill.schema';
 
 export type JobDocument = Job & Document;
@@ -26,6 +27,9 @@ export class Job {
 
   @Prop({ default: [] })
   requiredSkills: Skill[];
+
+  @Prop({ type: Types.ObjectId, ref: 'Company', required: true })
+  companyId: mongoose.Types.ObjectId;
 
   @Prop({
     type: Types.ObjectId,
