@@ -6,22 +6,23 @@ import { JobSeeker, JobSeekerSchema } from './schemas/jobseeker.schema';
 import { User, UserSchema } from 'src/users/schemas/user.schema';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import {
-  Application,
-  ApplicationSchema,
-} from 'src/applications/schemas/application.schema';
-import { ApplicationService } from 'src/applications/applications.service';
+
 import { Job, JobSchema } from 'src/jobs/schemas/job.schema';
-import { JobsService } from 'src/jobs/jobs.service';
-import { JobsModule } from 'src/jobs/jobs.module';
 import {
   Employer,
   EmployerSchema,
 } from 'src/employers/schemas/employer.schema';
-import { EmployersModule } from 'src/employers/employers.module';
 import { Skill, SkillSchema } from 'src/skill/schemas/skill.schema';
+import {
+  Application,
+  ApplicationSchema,
+} from 'src/applications/schemas/application.schema';
+
+import { EmployersModule } from 'src/employers/employers.module';
 import { SkillModule } from 'src/skill/skill.module';
 import { CompanyModule } from 'src/company/company.module';
+import { JobsModule } from 'src/jobs/jobs.module';
+import { ApplicationsModule } from 'src/applications/applications.module'; // ✅ הוסף את זה
 
 @Module({
   imports: [
@@ -36,13 +37,15 @@ import { CompanyModule } from 'src/company/company.module';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: 'tomer',
-      signOptions: { expiresIn: '24h' }, // ✅ Set token expiration
+      signOptions: { expiresIn: '24h' },
     }),
     EmployersModule,
     SkillModule,
     CompanyModule,
+    JobsModule, // ✅ במקום לספק את JobsService
+    ApplicationsModule, // ✅ במקום לספק את ApplicationService
   ],
-  providers: [JobseekersService, ApplicationService, JobsService],
+  providers: [JobseekersService], // ✅ רק מה ששייך ישירות למודול הזה
   controllers: [JobseekersController],
   exports: [JobseekersService],
 })

@@ -31,8 +31,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       name: profile.displayName,
       role: role === 'employer' ? 'employer' : 'jobseeker',
       companyName: companyName || undefined,
+      picture: profile.photos?.[0]?.value, // ✅ add this line
     };
 
-    done(null, user); // 👈 This is what you'll get as req.user
+    done(null, user);
   }
 }

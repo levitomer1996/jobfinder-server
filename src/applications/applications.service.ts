@@ -7,6 +7,7 @@ import { Application, ApplicationDocument } from './schemas/application.schema';
 import { Job, JobDocument } from 'src/jobs/schemas/job.schema';
 import { JobsService } from 'src/jobs/jobs.service';
 import { App } from 'supertest/types';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class ApplicationService {
@@ -14,6 +15,7 @@ export class ApplicationService {
     @InjectModel(Application.name)
     private applicationModel: Model<ApplicationDocument>,
     private readonly jobService: JobsService,
+    private readonly notificationService: NotificationService,
   ) {}
   private readonly logger = new Logger(ApplicationService.name);
   async create(

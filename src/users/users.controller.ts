@@ -21,6 +21,7 @@ import { EmployersService } from 'src/employers/employers.service';
 import { UploadService } from 'src/upload/upload.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Response, Request } from 'express'; // ✅ make sure you import this
+import { NotificationService } from 'src/notification/notification.service';
 
 @Controller('users')
 export class UsersController {
@@ -32,6 +33,7 @@ export class UsersController {
     private readonly jobSeekerService: JobseekersService,
     private readonly uploadService: UploadService,
     private readonly employerService: EmployersService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   @Post('register/jobseeker')
@@ -60,7 +62,7 @@ export class UsersController {
     if (user.role === 'jobseeker') {
       const foundJobseeker =
         await this.jobSeekerService.getJobSeekerProfileByUserId(user._id);
-
+      this.logger.log(user);
       const foundResumes = await this.uploadService.getResumeById(
         foundJobseeker.resume,
       );
@@ -75,12 +77,19 @@ export class UsersController {
           user,
           foundJobseeker._id,
         );
-      const profileImageUrl = await this.uploadService.getProfileImageByUserId(
+      let profileImageUrl = await this.uploadService.getProfileImageByUserId(
         user._id,
       );
+
       const unreadedChats = await this.usersService.getUserUndreadedChats(
         user._id,
       );
+
+      const notifications = await this.notificationService.getUserNotifications(
+        user._id,
+      );
+      this.logger.log(`profileimagge${profileImageUrl}`);
+      this.logger.log(`Profileimage user${user.profileImageUrl}`);
       const chats = await this.usersService.getUsersChats(user._id);
       return {
         ...user,
@@ -88,9 +97,11 @@ export class UsersController {
         resumes: foundResumes,
         suggestedJobs,
         appliedJobs,
-        profileImageUrl,
+        profileImageUrl:
+          profileImageUrl == null ? user.profileImageUrl : profileImageUrl,
         chats,
         unreadedChats,
+        notifications,
       };
     } else if (user.role === 'employer') {
       const foundEmployer = await this.employerService.getEmployerByUserId(
@@ -134,7 +145,6 @@ export class UsersController {
     @Res({ passthrough: false }) res: Response,
   ) {
     const user = req.user as GoogleAuthPayload;
-
     const token = await this.usersService.googleLoginOrRegister(user);
 
     res.redirect(`http://localhost:3000/oauth2callback?token=${token}`);

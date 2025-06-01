@@ -34,6 +34,7 @@ export interface GoogleAuthPayload {
   name: string;
   role?: 'jobseeker' | 'employer';
   companyName?: string;
+  picture?: string;
 }
 
 @Injectable()
@@ -223,6 +224,7 @@ export class UsersService {
       sub: user._id,
       role: user.role,
       name: user.name,
+      profileImageUrl: user.profileImageUrl,
     };
 
     const token = this.jwtService.sign(payload);
@@ -337,8 +339,12 @@ export class UsersService {
         name: user.name,
         email: user.email,
         role,
+        profileImageUrl: user.picture,
       });
       await existing.save();
+      this.logger.log(
+        `Creating profile picture model from GOOGLE - ${existing._id}`,
+      );
 
       if (role === 'jobseeker') {
         const js = new this.jobSeekerModel({ user: existing._id });

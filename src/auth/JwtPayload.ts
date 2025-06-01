@@ -3,4 +3,5 @@ export default class {
   email: string;
   role: string;
   name: string;
+  profileImageUrl: string;
 }

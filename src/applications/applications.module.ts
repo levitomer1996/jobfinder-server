@@ -7,17 +7,20 @@ import { ApplicationController } from './applications.controller';
 import { JobsModule } from 'src/jobs/jobs.module'; // ✅ Add
 import { EmployersModule } from 'src/employers/employers.module'; // ✅ Add
 import { SkillModule } from 'src/skill/skill.module'; // ✅ Add
+import { NotificationService } from 'src/notification/notification.service';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Application.name, schema: ApplicationSchema },
     ]),
-    JobsModule, // ✅ brings in JobsService correctly
-    EmployersModule, // ✅ brings in EmployersService correctly
-    SkillModule, // ✅ brings in SkillService correctly
+    JobsModule,
+    EmployersModule,
+    SkillModule,
+    NotificationModule, // ✅ מספק את NotificationService כבר
   ],
-  providers: [ApplicationService], // ✅ Only your service here
+  providers: [ApplicationService], // ✅ הסרה של NotificationService
   controllers: [ApplicationController],
   exports: [ApplicationService],
 })

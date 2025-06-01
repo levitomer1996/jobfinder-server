@@ -196,4 +196,10 @@ export class UploadService {
       throw new Error('Failed to get profile image');
     }
   }
+  async createGoogleProfileImage(
+    userId: Types.ObjectId,
+    profileImageUrl: string,
+  ) {
+    return;
+  }
 }

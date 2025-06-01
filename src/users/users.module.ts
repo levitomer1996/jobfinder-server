@@ -35,10 +35,12 @@ import {
 import { ChatModule } from 'src/chat/chat.module';
 import { Company, CompanySchema } from 'src/company/schemas/company.schema';
 import { CompanyModule } from 'src/company/company.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
     CompanyModule,
+    NotificationModule,
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: JobSeeker.name, schema: JobSeekerSchema },

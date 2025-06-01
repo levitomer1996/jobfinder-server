@@ -41,6 +41,9 @@ export class User {
   // ✅ New field for profile image URL
   @Prop()
   profileImageUrl?: string;
+
+  @Prop({ enum: ['local', 'google'], default: 'local' })
+  authType: 'local' | 'google';
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

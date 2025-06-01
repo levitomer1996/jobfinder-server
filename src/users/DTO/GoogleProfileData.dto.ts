@@ -3,4 +3,5 @@ export interface GoogleProfileData {
   name: string;
   role?: 'jobseeker' | 'employer';
   companyName?: string;
+  picture?: string;
 }
