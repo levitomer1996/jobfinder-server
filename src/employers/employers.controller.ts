@@ -10,8 +10,6 @@ import {
 import { EmployersService } from './employers.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { GetUser } from '../users/Decorators/get-user.decorator';
-import { UserDocument } from '../users/schemas/user.schema';
-import { AuthGuard } from '@nestjs/passport';
 
 @Controller('employers')
 export class EmployersController {

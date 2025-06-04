@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
@@ -8,6 +8,8 @@ import { Job, JobDocument } from 'src/jobs/schemas/job.schema';
 import { JobsService } from 'src/jobs/jobs.service';
 import { App } from 'supertest/types';
 import { NotificationService } from 'src/notification/notification.service';
+import { JobseekersService } from 'src/jobseekers/jobseekers.service';
+import { EmployersService } from 'src/employers/employers.service';
 
 @Injectable()
 export class ApplicationService {
@@ -16,6 +18,8 @@ export class ApplicationService {
     private applicationModel: Model<ApplicationDocument>,
     private readonly jobService: JobsService,
     private readonly notificationService: NotificationService,
+    @Inject(forwardRef(() => EmployersService)) // ✅ אותו דבר כאן
+    private readonly employerService: EmployersService,
   ) {}
   private readonly logger = new Logger(ApplicationService.name);
   async create(
@@ -37,6 +41,17 @@ export class ApplicationService {
     this.logger.log(
       `Attached Aplication - ${createdApplication._id} to job - ${createApplicationDto.jobId}`,
     );
+    const foundJob = await this.jobService.getJobById(
+      new Types.ObjectId(createApplicationDto.jobId),
+    );
+    const foundEmployer = await this.employerService.getEmployerById(
+      foundJob.postedBy,
+    );
+    await this.notificationService.createNotification(
+      foundEmployer.user,
+      'You have new job seeker aplication',
+    );
+
     return createdApplication;
   }
 

@@ -201,4 +201,32 @@ export class ChatService {
 
     return unreadChats;
   }
+  async getOrCreateChat(
+    userId1: Types.ObjectId,
+    userId2: Types.ObjectId,
+  ): Promise<Chat> {
+    // Try to find existing chat
+    const existingChat = await this.chatModel.findOne({
+      participants: { $all: [userId1, userId2], $size: 2 },
+    });
+
+    if (existingChat) {
+      this.logger.log(
+        `Found existing chat between ${userId1} and ${userId2}: ${existingChat._id}`,
+      );
+      return existingChat;
+    }
+
+    // No chat found – create new one
+    const newChat = new this.chatModel({
+      participants: [userId1, userId2],
+      messages: [],
+    });
+
+    await newChat.save();
+    this.logger.log(
+      `Created new chat between ${userId1} and ${userId2}: ${newChat._id}`,
+    );
+    return newChat;
+  }
 }

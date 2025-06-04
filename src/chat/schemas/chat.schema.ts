@@ -11,6 +11,9 @@ export enum ChatType {
 
 @Schema({ timestamps: true })
 export class Chat {
+  // ✅ Explicitly declare _id for TypeScript (optional but helps)
+  _id: Types.ObjectId;
+
   @Prop({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     required: true,

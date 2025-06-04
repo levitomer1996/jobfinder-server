@@ -1,26 +1,27 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Application, ApplicationSchema } from './schemas/application.schema';
 import { ApplicationService } from './applications.service';
 import { ApplicationController } from './applications.controller';
 
-import { JobsModule } from 'src/jobs/jobs.module'; // ✅ Add
-import { EmployersModule } from 'src/employers/employers.module'; // ✅ Add
-import { SkillModule } from 'src/skill/skill.module'; // ✅ Add
-import { NotificationService } from 'src/notification/notification.service';
+import { JobsModule } from 'src/jobs/jobs.module';
+import { EmployersModule } from 'src/employers/employers.module';
+import { SkillModule } from 'src/skill/skill.module';
 import { NotificationModule } from 'src/notification/notification.module';
+import { JobseekersModule } from 'src/jobseekers/jobseekers.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Application.name, schema: ApplicationSchema },
     ]),
-    JobsModule,
-    EmployersModule,
+    forwardRef(() => JobsModule),
+    forwardRef(() => EmployersModule), // ✅ השתמש רק בזה
     SkillModule,
-    NotificationModule, // ✅ מספק את NotificationService כבר
+    NotificationModule,
+    forwardRef(() => JobseekersModule),
   ],
-  providers: [ApplicationService], // ✅ הסרה של NotificationService
+  providers: [ApplicationService],
   controllers: [ApplicationController],
   exports: [ApplicationService],
 })

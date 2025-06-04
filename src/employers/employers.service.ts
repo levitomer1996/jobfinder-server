@@ -12,8 +12,8 @@ export class EmployersService {
   ) {}
   private readonly logger = new Logger(EmployersService.name);
 
-  async getEmployerById(id: string): Promise<Employer> {
-    return await this.employerModel.findById(new Types.ObjectId(id));
+  async getEmployerById(id: Types.ObjectId): Promise<Employer> {
+    return await this.employerModel.findById(id);
   }
 
   async getEmployerByUser(userId: Types.ObjectId): Promise<Employer> {

@@ -22,6 +22,10 @@ import { UploadService } from 'src/upload/upload.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Response, Request } from 'express'; // ✅ make sure you import this
 import { NotificationService } from 'src/notification/notification.service';
+import { CreateApplicationDto } from 'src/applications/dto/create-application.dto';
+import { ApplicationService } from 'src/applications/applications.service';
+import { Application } from 'src/applications/schemas/application.schema';
+import { JobsService } from 'src/jobs/jobs.service';
 
 @Controller('users')
 export class UsersController {
@@ -34,6 +38,8 @@ export class UsersController {
     private readonly uploadService: UploadService,
     private readonly employerService: EmployersService,
     private readonly notificationService: NotificationService,
+    private readonly applicationService: ApplicationService,
+    private readonly jobService: JobsService,
   ) {}
 
   @Post('register/jobseeker')
@@ -148,5 +154,23 @@ export class UsersController {
     const token = await this.usersService.googleLoginOrRegister(user);
 
     res.redirect(`http://localhost:3000/oauth2callback?token=${token}`);
+  }
+
+  @Post('/createuseraplication')
+  async createUserApplication(
+    @Body() createApplicationDto: CreateApplicationDto,
+  ): Promise<Application> {
+    this.logger.log(`Payload: ${JSON.stringify(createApplicationDto)}`);
+    const apllication =
+      await this.applicationService.create(createApplicationDto);
+    this.logger.log('Creating notification');
+    this.logger.log(`Searching for Job by ID ${apllication.jobId}`);
+    const foundJob = await this.jobService.getJobById(apllication.jobId);
+
+    const noti = await this.notificationService.createNotification(
+      foundJob.postedBy,
+      `New Job application was made by user `,
+    );
+    return apllication;
   }
 }

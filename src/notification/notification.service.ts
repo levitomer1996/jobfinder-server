@@ -4,7 +4,7 @@ import { Model, Types } from 'mongoose';
 import {
   Notification,
   NotificationDocument,
-} from './schemas/notification.schema';
+} from './schema/notification.schema';
 
 @Injectable()
 export class NotificationService {

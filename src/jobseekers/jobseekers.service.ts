@@ -1,27 +1,38 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId, Types } from 'mongoose';
 import { JobSeeker, JobSeekerDocument } from './schemas/jobseeker.schema';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
 import { info } from 'console';
 import JwtPayload from 'src/auth/JwtPayload';
-import { ApplicationService } from 'src/applications/applications.service';
 import { Job } from 'src/jobs/schemas/job.schema';
 import { JobsService } from 'src/jobs/jobs.service';
 import { SkillService } from 'src/skill/skill.service';
 import { Skill } from 'src/skill/schemas/skill.schema';
 import { JOB_SEEKER_PROFILE_ACTIONS } from './DTO/JOB_SEEKER_PROFILE_ACTIONS.enum';
+import { ApplicationService } from 'src/applications/applications.service';
 
 @Injectable()
 export class JobseekersService {
   constructor(
     @InjectModel(JobSeeker.name)
     private jobSeekerModel: Model<JobSeekerDocument>,
+    @Inject(forwardRef(() => ApplicationService)) // ✅ זה הפתרון!
     private applicationService: ApplicationService,
     private jobService: JobsService,
     private skillService: SkillService,
   ) {}
   logger = new Logger('Jobseeker-service');
+
+  async getById(id: Types.ObjectId): Promise<JobSeeker> {
+    return await this.jobSeekerModel.findById(id);
+  }
 
   async getJobSeekerByUser(user: JwtPayload): Promise<JobSeeker> {
     this.logger.log(`Looking for jobseeker attached to user ID- ${user._id}`);
