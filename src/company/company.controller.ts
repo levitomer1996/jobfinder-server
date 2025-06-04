@@ -3,7 +3,7 @@ import { CompanyService } from './company.service';
 
 import { Company } from './schemas/company.schema';
 import { CreateCompanyDto } from './dto/create-company.dto';
-
+//Change
 @Controller('company')
 export class CompanyController {
   constructor(private readonly companyService: CompanyService) {}
