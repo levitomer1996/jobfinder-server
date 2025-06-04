@@ -3,7 +3,7 @@ import { Document, Types } from 'mongoose';
 import mongoose from 'mongoose';
 
 export type CompanyDocument = Company & Document;
-
+//Fixed for Render
 @Schema({ timestamps: true })
 export class Company {
   @Prop({ required: true, unique: true })
