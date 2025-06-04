@@ -1,7 +1,8 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { CompanyService } from './company.service';
+
+import { Company } from './schemas/company.schema';
 import { CreateCompanyDto } from './dto/create-company.dto';
-import { Company, CompanyDocument } from './schemas/company.schema';
 
 @Controller('company')
 export class CompanyController {
