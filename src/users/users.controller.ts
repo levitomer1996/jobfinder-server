@@ -13,7 +13,7 @@ import {
 import { GoogleAuthPayload, UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JobSeekerSignupDTO, CreateEmployerDto } from './DTO/SignupDTO';
-import { User } from './schemas/user.schema';
+import { User, UserDocument } from './schemas/user.schema';
 import { GetUser } from './Decorators/get-user.decorator';
 import { JobseekersService } from 'src/jobseekers/jobseekers.service';
 import { Types } from 'mongoose';
@@ -26,6 +26,7 @@ import { CreateApplicationDto } from 'src/applications/dto/create-application.dt
 import { ApplicationService } from 'src/applications/applications.service';
 import { Application } from 'src/applications/schemas/application.schema';
 import { JobsService } from 'src/jobs/jobs.service';
+import UserProfilePublicDTO from './DTO/UserProfilePublic.dto';
 
 @Controller('users')
 export class UsersController {
@@ -94,9 +95,11 @@ export class UsersController {
       const notifications = await this.notificationService.getUserNotifications(
         user._id,
       );
+
       this.logger.log(`profileimagge${profileImageUrl}`);
       this.logger.log(`Profileimage user${user.profileImageUrl}`);
       const chats = await this.usersService.getUsersChats(user._id);
+
       return {
         ...user,
         jobSeekerProfile: foundJobseeker,
@@ -110,10 +113,33 @@ export class UsersController {
         notifications,
       };
     } else if (user.role === 'employer') {
+      let profileImageUrl = await this.uploadService.getProfileImageByUserId(
+        user._id,
+      );
+
+      const unreadedChats = await this.usersService.getUserUndreadedChats(
+        user._id,
+      );
+
+      const notifications = await this.notificationService.getUserNotifications(
+        user._id,
+      );
+      this.logger.log(
+        `Found ${notifications.length} notifications for user ${user._id}`,
+      );
+
       const foundEmployer = await this.employerService.getEmployerByUserId(
         user._id,
       );
-      return { ...user, employerProfile: foundEmployer };
+      const chats = await this.usersService.getUsersChats(user._id);
+      return {
+        ...user,
+        employerProfile: foundEmployer,
+        profileImageUrl,
+        unreadedChats,
+        notifications,
+        chats,
+      };
     } else {
       return;
     }
@@ -167,10 +193,20 @@ export class UsersController {
     this.logger.log(`Searching for Job by ID ${apllication.jobId}`);
     const foundJob = await this.jobService.getJobById(apllication.jobId);
 
-    const noti = await this.notificationService.createNotification(
-      foundJob.postedBy,
-      `New Job application was made by user `,
-    );
     return apllication;
+  }
+
+  @Post('usersprofiles')
+  async getUsersProfilesByIds(
+    @Body() body: { ids: Types.ObjectId[] },
+  ): Promise<UserProfilePublicDTO[]> {
+    const foundUsers = await this.usersService.getUsersProfilesByIds(body.ids);
+
+    return foundUsers.map((user) => ({
+      _id: user._id,
+      profileImageUrl: user.profileImageUrl,
+      name: user.name,
+      email: user.email,
+    }));
   }
 }

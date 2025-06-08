@@ -28,6 +28,7 @@ import { GoogleProfileData } from './DTO/GoogleProfileData.dto';
 import { ChatService } from 'src/chat/chat.service';
 import { CreateEmployerDto } from './DTO/SignupDTO';
 import { CompanyService } from 'src/company/company.service';
+import UserProfilePublicDTO from './DTO/UserProfilePublic.dto';
 
 export interface GoogleAuthPayload {
   email: string;
@@ -375,5 +376,9 @@ export class UsersService {
   }
   async getUsersChats(userId: Types.ObjectId) {
     return this.chatService.getChatsByUserId(userId);
+  }
+  async getUsersProfilesByIds(ids: Types.ObjectId[]): Promise<UserDocument[]> {
+    const objectIds = ids.map((id) => new Types.ObjectId(id));
+    return await this.userModel.find({ _id: { $in: objectIds } });
   }
 }
