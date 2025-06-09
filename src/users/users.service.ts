@@ -56,12 +56,7 @@ export class UsersService {
     private companyService: CompanyService,
   ) {}
 
-  async registerJobSeeker(
-    name: string,
-    email: string,
-    password: string,
-    phoneNumber?: string,
-  ) {
+  async registerJobSeeker(name: string, email: string, password: string) {
     this.logger.log(`🔍 Checking if email is already in use: ${email}`);
 
     const existingUser = await this.userModel.findOne({ email });
@@ -83,7 +78,6 @@ export class UsersService {
       email,
       passwordHash: hashedPassword,
       role: 'jobseeker',
-      phoneNumber,
     });
 
     await newUser.save();
@@ -104,11 +98,11 @@ export class UsersService {
     await newUser.save();
 
     this.logger.log(`✅ JobSeeker profile linked to user: ${newUserId}`);
-    return this.generateToken(newUser);
+    return;
   }
 
   async registerEmployer(dto: CreateEmployerDto) {
-    const { name, email, password, phoneNumber, company } = dto;
+    const { name, email, password, company } = dto;
 
     this.logger.log(`🔍 Checking if email is already in use: ${email}`);
     if (!email) {
@@ -136,7 +130,6 @@ export class UsersService {
       email,
       passwordHash: hashedPassword,
       role: 'employer',
-      phoneNumber,
     });
     await newUser.save();
 
@@ -194,7 +187,7 @@ export class UsersService {
     );
 
     this.logger.log(`✅ Employer registration completed`);
-    return this.generateToken(newUser);
+    return;
   }
 
   async login(email: string, password: string) {
@@ -380,5 +373,26 @@ export class UsersService {
   async getUsersProfilesByIds(ids: Types.ObjectId[]): Promise<UserDocument[]> {
     const objectIds = ids.map((id) => new Types.ObjectId(id));
     return await this.userModel.find({ _id: { $in: objectIds } });
+  }
+  async getUsersByIds(ids: (string | Types.ObjectId)[]): Promise<User[]> {
+    this.logger.log(`🔍 Getting users by IDs: ${ids.length} requested`);
+
+    if (!ids || ids.length === 0) {
+      this.logger.warn('⚠️ No user IDs provided');
+      return [];
+    }
+
+    try {
+      const objectIds = ids.map((id) =>
+        typeof id === 'string' ? new Types.ObjectId(id) : id,
+      );
+
+      const users = await this.userModel.find({ _id: { $in: objectIds } });
+      this.logger.log(`✅ Found ${users.length} users`);
+      return users;
+    } catch (error) {
+      this.logger.error('💥 Error fetching users by IDs', error.stack);
+      throw new BadRequestException('Invalid user ID(s)');
+    }
   }
 }

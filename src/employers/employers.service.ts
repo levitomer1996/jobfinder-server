@@ -75,4 +75,12 @@ export class EmployersService {
 
     return employer;
   }
+  async getEmployersByIds(
+    ids: Types.ObjectId[] | string[],
+  ): Promise<Employer[]> {
+    const objectIds = ids.map((id) => new Types.ObjectId(id));
+    return await this.employerModel.find({
+      _id: { $in: objectIds },
+    });
+  }
 }

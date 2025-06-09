@@ -11,7 +11,10 @@ async function bootstrap() {
 
   // ✅ Serve static files from /uploads
   app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
-
+  app.use(
+    '/companyimage',
+    express.static(path.join(__dirname, '..', 'uploads', 'companyimage')),
+  );
   await app.listen(process.env.PORT || 3000); // fallback to port 3000
 }
 bootstrap();

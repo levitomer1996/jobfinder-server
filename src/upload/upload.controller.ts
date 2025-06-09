@@ -129,4 +129,26 @@ export class UploadController {
     }
     return { url };
   }
+  @Post('/company-profile-image/:companyId')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCompanyProfileImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('companyId') companyId: string,
+    @GetUser() user: JwtPayload,
+  ) {
+    if (!file) {
+      throw new Error('No file uploaded');
+    }
+
+    const imageUrl = await this.uploadService.uploadCompanyProfileImage(
+      companyId,
+      file,
+    );
+
+    return {
+      message: 'Company profile image uploaded successfully',
+      url: imageUrl,
+    };
+  }
 }

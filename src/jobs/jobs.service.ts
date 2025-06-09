@@ -36,14 +36,15 @@ export class JobsService {
     try {
       this.logger.log(`Looking up employer for user ID: ${userId}`);
       const employer = await this.employerService.findEmployerByUser(userId);
-      const company = await this.comapnyService.findCompanyByEmployer(
-        employer._id,
-      );
 
       if (!employer) {
         this.logger.warn(`No employer found for user ID: ${userId}`);
         throw new BadRequestException(`Employer profile not found for user.`);
       }
+
+      const company = await this.comapnyService.findCompanyByEmployer(
+        employer._id,
+      );
 
       this.logger.log(
         `Creating new job: ${createJobDto.title} for employer ID: ${employer._id}`,
@@ -54,12 +55,14 @@ export class JobsService {
       );
 
       const newJob = new this.jobModel({
-        ...createJobDto,
+        title: createJobDto.title,
+        description: createJobDto.description,
+        location: createJobDto.location,
+        jobType: createJobDto.jobType, // ✅ Add jobType to model
+        requiredSkills: requiredSkillsToPush,
         postedBy: employer._id,
         companyId: company._id,
       });
-
-      newJob.requiredSkills = requiredSkillsToPush;
 
       await newJob.save();
       this.logger.log(`Job successfully created - ID: ${newJob.id}`);
@@ -68,6 +71,7 @@ export class JobsService {
         `Adding job ID: ${newJob.id} to employer ID: ${employer._id}`,
       );
       await this.employerService.addJobToEmployerById(employer._id, newJob.id);
+
       this.logger.log(
         `Job ID: ${newJob.id} linked to employer ID: ${employer._id}`,
       );
@@ -162,10 +166,15 @@ export class JobsService {
     }
   }
 
-  async getJobsByTitleAndLocation(title?: string, location?: string) {
+  async getJobsByTitleLocationAndType(
+    title?: string,
+    location?: string,
+    jobType?: string,
+  ) {
     this.logger.log(
-      `Searching for jobs by title and/or location. Title: ${title}, Location: ${location}`,
+      `Searching jobs with filters - Title: ${title}, Location: ${location}, JobType: ${jobType}`,
     );
+
     try {
       const filter: any = {};
 
@@ -177,6 +186,10 @@ export class JobsService {
         filter.location = { $regex: location, $options: 'i' };
       }
 
+      if (jobType) {
+        filter.jobType = jobType; // ✅ exact match for type (e.g., 'full-time')
+      }
+
       const jobs = await this.jobModel.find(filter);
       this.logger.log(`Found ${jobs.length} jobs matching filters`);
       return jobs;
@@ -186,7 +199,7 @@ export class JobsService {
         error.stack,
       );
       throw new InternalServerErrorException(
-        'Failed to fetch jobs by title and location.',
+        'Failed to fetch jobs with the provided filters.',
       );
     }
   }

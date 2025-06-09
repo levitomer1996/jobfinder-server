@@ -9,6 +9,7 @@ import {
   Param,
   Req,
   Res,
+  HttpCode,
 } from '@nestjs/common';
 import { GoogleAuthPayload, UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -27,6 +28,7 @@ import { ApplicationService } from 'src/applications/applications.service';
 import { Application } from 'src/applications/schemas/application.schema';
 import { JobsService } from 'src/jobs/jobs.service';
 import UserProfilePublicDTO from './DTO/UserProfilePublic.dto';
+import { CompanyService } from 'src/company/company.service';
 
 @Controller('users')
 export class UsersController {
@@ -41,21 +43,25 @@ export class UsersController {
     private readonly notificationService: NotificationService,
     private readonly applicationService: ApplicationService,
     private readonly jobService: JobsService,
+    private readonly companyService: CompanyService,
   ) {}
 
   @Post('register/jobseeker')
+  @HttpCode(200)
   async registerJobSeeker(@Body() jobSeekerDTO: JobSeekerSignupDTO) {
-    return this.usersService.registerJobSeeker(
+    await this.usersService.registerJobSeeker(
       jobSeekerDTO.name,
       jobSeekerDTO.email,
       jobSeekerDTO.password,
-      jobSeekerDTO.phoneNumber,
     );
+    return { message: 'Registration successful' };
   }
 
   @Post('register/employer')
+  @HttpCode(200)
   async registerEmployer(@Body() employerDto: CreateEmployerDto) {
-    return this.usersService.registerEmployer(employerDto);
+    await this.usersService.registerEmployer(employerDto);
+    return { message: 'Registration successful' };
   }
 
   @Post('signin')
@@ -208,5 +214,49 @@ export class UsersController {
       name: user.name,
       email: user.email,
     }));
+  }
+
+  @Get('/getcompanybyid/:id')
+  async getCompanyById(@Param('id') id: string) {
+    const logger = new Logger('CompanyController');
+
+    try {
+      logger.log(`🔍 Fetching company with ID: ${id}`);
+      const foundCompany = await this.companyService.findCompanyById(id);
+
+      if (!foundCompany) {
+        logger.warn(`Company not found with ID: ${id}`);
+        throw new NotFoundException(`Company with ID ${id} not found`);
+      }
+
+      logger.log(`✅ Company found: ${foundCompany.name}`);
+      const foundEmployers = await this.employerService.getEmployersByIds(
+        foundCompany.recruiters,
+      );
+
+      const employerUserIds = foundEmployers.map((employer) => employer.user);
+      const foundEmployerUsers =
+        await this.usersService.getUsersByIds(employerUserIds);
+
+      // 🔒 Filter out sensitive fields like passwordHash
+      const safeUsers = foundEmployerUsers.map((user) => ({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phoneNumber: user.phoneNumber,
+        profileImageUrl: user.profileImageUrl,
+        createdAt: user.createdAt,
+      }));
+
+      return {
+        company: foundCompany,
+        recruiters: foundEmployers,
+        recruiterUsers: safeUsers,
+      };
+    } catch (error) {
+      logger.error(`💥 Error fetching company by ID: ${id}`, error.stack);
+      throw error;
+    }
   }
 }

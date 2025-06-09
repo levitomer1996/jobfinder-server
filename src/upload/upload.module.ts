@@ -19,6 +19,7 @@ import {
   ProfileImageSchema,
 } from './Schemas/profileimage.schema';
 import { User, UserSchema } from 'src/users/schemas/user.schema';
+import { Company, CompanySchema } from 'src/company/schemas/company.schema'; // ✅ added
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { User, UserSchema } from 'src/users/schemas/user.schema';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: 'tomer',
-      signOptions: { expiresIn: '24h' }, // ✅ Set token expiration
+      signOptions: { expiresIn: '24h' },
     }),
     MongooseModule.forFeature([{ name: Pdf.name, schema: PdfSchema }]),
     MongooseModule.forFeature([
@@ -38,6 +39,9 @@ import { User, UserSchema } from 'src/users/schemas/user.schema';
     MongooseModule.forFeature([
       { name: Application.name, schema: ApplicationSchema },
       { name: User.name, schema: UserSchema },
+    ]),
+    MongooseModule.forFeature([
+      { name: Company.name, schema: CompanySchema }, // ✅ added company model
     ]),
   ],
   controllers: [UploadController],

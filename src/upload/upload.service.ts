@@ -19,6 +19,7 @@ import {
   ProfileImage,
   ProfileImageDocument,
 } from './Schemas/profileimage.schema';
+import { Company, CompanyDocument } from 'src/company/schemas/company.schema';
 
 @Injectable()
 export class UploadService {
@@ -30,6 +31,8 @@ export class UploadService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(ProfileImage.name)
     private profileImageModel: Model<ProfileImageDocument>,
+    @InjectModel(Company.name)
+    private companyModel: Model<CompanyDocument>,
   ) {}
 
   async savePdfResumeMetadata(userId: string, token: String, filename: String) {
@@ -200,7 +203,61 @@ export class UploadService {
     userId: Types.ObjectId,
     profileImageUrl: string,
   ) {
-    
     return;
+  }
+
+  async uploadCompanyProfileImage(
+    companyId: string,
+    file: Express.Multer.File,
+  ): Promise<string> {
+    try {
+      this.logger.log(`🔄 Starting company image upload for ID: ${companyId}`);
+
+      if (!Types.ObjectId.isValid(companyId)) {
+        this.logger.warn(`❌ Invalid ObjectId: ${companyId}`);
+        throw new Error('Invalid company ID');
+      }
+
+      const company = await this.companyModel.findById(companyId);
+      if (!company) {
+        this.logger.warn(`❌ Company not found with ID: ${companyId}`);
+        throw new Error('Company not found');
+      }
+
+      const fileExtension = path.extname(file.originalname) || '.png';
+      const filename = `company_${companyId}${fileExtension}`;
+      const folderPath = path.join(
+        __dirname,
+        '..',
+        '..',
+        'uploads',
+        'companyimage',
+      );
+      const filePath = path.join(folderPath, filename);
+      const profileImageUrl = `/uploads/companyimage/${filename}`;
+
+      if (!fs.existsSync(folderPath)) {
+        fs.mkdirSync(folderPath, { recursive: true });
+        this.logger.log(`📁 Created directory: ${folderPath}`);
+      }
+
+      fs.writeFileSync(filePath, file.buffer);
+      this.logger.log(`📦 Saved company image to: ${filePath}`);
+
+      company.profileImage = profileImageUrl;
+      await company.save();
+
+      this.logger.log(
+        `✅ Updated company (${companyId}) with new profile image: ${profileImageUrl}`,
+      );
+
+      return profileImageUrl;
+    } catch (error) {
+      this.logger.error(
+        `🔥 Failed to upload company image for company: ${companyId}`,
+        error.stack,
+      );
+      throw new Error('Failed to upload company profile image');
+    }
   }
 }

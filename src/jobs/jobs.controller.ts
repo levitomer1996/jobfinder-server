@@ -46,14 +46,19 @@ export class JobsController {
   }
 
   @Get('searchjob')
-  async getJobByTitleAndLocation(
+  async getJobByTitleLocationAndType(
     @Query('title') title: string,
     @Query('location') location: string,
+    @Query('jobType') jobType: string, // ✅ added
   ) {
     this.logger.log(
-      `Searching jobs by title="${title}" and location="${location}"`,
+      `Searching jobs by title="${title}", location="${location}", jobType="${jobType}"`,
     );
-    return await this.jobsService.getJobsByTitleAndLocation(title, location);
+    return await this.jobsService.getJobsByTitleLocationAndType(
+      title,
+      location,
+      jobType,
+    );
   }
   @Get(':id')
   async getJobById(@Param('id') id: string) {

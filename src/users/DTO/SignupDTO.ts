@@ -56,10 +56,6 @@ export class CreateEmployerDto {
   @IsString()
   confirmPassword?: string;
 
-  @IsOptional()
-  @IsString()
-  phoneNumber?: string;
-
   @IsBoolean()
   agree: boolean;
 
