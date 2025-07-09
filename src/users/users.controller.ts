@@ -159,6 +159,18 @@ export class UsersController {
     );
   }
 
+  @Get('/getuserbyemployerid/readonly/:id')
+  async getUserByEmployerIdReadOnly(@Param() id: string) {
+    const foundUser = await this.usersService.getUserByEmployerId(
+      new Types.ObjectId(id),
+    );
+    return {
+      profileImage: foundUser.profileImageUrl,
+      name: foundUser.name,
+      email: foundUser.email,
+    };
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('/getapplicantsbyjobid/:id')
   async getApplicantsByJobId(@Param('id') id: string) {

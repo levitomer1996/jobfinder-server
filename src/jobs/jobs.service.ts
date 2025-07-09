@@ -62,6 +62,7 @@ export class JobsService {
         requiredSkills: requiredSkillsToPush,
         postedBy: employer._id,
         companyId: company._id,
+        companyName: company.name,
       });
 
       await newJob.save();

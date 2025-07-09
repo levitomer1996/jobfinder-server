@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model, Mongoose, Types } from 'mongoose';
 import { Company, CompanyDocument } from './schemas/company.schema';
 import { CreateCompanyDto } from './dto/create-company.dto';
 
@@ -21,6 +21,15 @@ export class CompanyService {
     return await this.companyModel.find({
       name: { $regex: name, $options: 'i' },
     });
+  }
+
+  async getCompanyProfileImageById(id: Types.ObjectId): Promise<string> {
+    const foundCompany = await this.companyModel.findById(id);
+    if (foundCompany.profileImage) {
+      return foundCompany.profileImage;
+    } else {
+      this.logger.warn(`Profile was not found for company id ${id}`);
+    }
   }
 
   async findCompanyByName(name: string): Promise<CompanyDocument> {

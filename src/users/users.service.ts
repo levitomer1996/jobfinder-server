@@ -29,6 +29,7 @@ import { ChatService } from 'src/chat/chat.service';
 import { CreateEmployerDto } from './DTO/SignupDTO';
 import { CompanyService } from 'src/company/company.service';
 import UserProfilePublicDTO from './DTO/UserProfilePublic.dto';
+import { profile } from 'console';
 
 export interface GoogleAuthPayload {
   email: string;
@@ -278,6 +279,7 @@ export class UsersService {
 
       return {
         name: foundUser.name,
+        profileImageUrl: foundUser.profileImageUrl,
         email: foundUser.email,
         _id: foundUser._id,
       };
@@ -374,6 +376,7 @@ export class UsersService {
     const objectIds = ids.map((id) => new Types.ObjectId(id));
     return await this.userModel.find({ _id: { $in: objectIds } });
   }
+
   async getUsersByIds(ids: (string | Types.ObjectId)[]): Promise<User[]> {
     this.logger.log(`🔍 Getting users by IDs: ${ids.length} requested`);
 

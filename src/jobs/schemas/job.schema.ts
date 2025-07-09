@@ -25,7 +25,8 @@ export class Job {
 
   @Prop({ type: Types.ObjectId, ref: 'Company', required: true })
   companyId: mongoose.Types.ObjectId;
-
+  @Prop({ required: true })
+  companyName: string;
   @Prop({ type: Types.ObjectId, ref: 'Employer', required: true })
   postedBy: mongoose.Types.ObjectId;
 
