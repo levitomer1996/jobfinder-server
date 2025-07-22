@@ -197,7 +197,9 @@ export class UsersController {
     const user = req.user as GoogleAuthPayload;
     const token = await this.usersService.googleLoginOrRegister(user);
 
-    res.redirect(`http://localhost:3000/oauth2callback?token=${token}`);
+    res.redirect(
+      `${process.env.GOOGLE_RES_REDIRECT}/oauth2callback?token=${token}`,
+    );
   }
 
   @Post('/createuseraplication')
