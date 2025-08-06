@@ -245,8 +245,12 @@ export class UsersService {
 
     const skillMap = new Map<string, number>();
 
-    for (const job of appliedJobs) {
-      for (const skill of job.requiredSkills || []) {
+    for (const job of appliedJobs || []) {
+      if (!job || !job.requiredSkills) continue;
+
+      for (const skill of job.requiredSkills) {
+        if (!skill || !skill._id) continue;
+
         const id = skill._id.toString();
         skillMap.set(id, (skillMap.get(id) || 0) + 1);
       }
@@ -255,13 +259,17 @@ export class UsersService {
     const notAppliedJobs =
       await this.jobSeekerSevice.getNotAppliedJobsByJobSeekerId(jobseekerId);
 
-    const scoredJobs = notAppliedJobs.map((job) => {
-      const score = (job.requiredSkills || []).reduce((acc, skill) => {
-        const id = skill._id.toString();
-        return acc + (skillMap.get(id) || 0);
-      }, 0);
-      return { job, score };
-    });
+    const scoredJobs = (notAppliedJobs || [])
+      .filter((job) => job && Array.isArray(job.requiredSkills))
+      .map((job) => {
+        const score = job.requiredSkills.reduce((acc, skill) => {
+          if (!skill || !skill._id) return acc;
+
+          const id = skill._id.toString();
+          return acc + (skillMap.get(id) || 0);
+        }, 0);
+        return { job, score };
+      });
 
     scoredJobs.sort((a, b) => b.score - a.score);
 
