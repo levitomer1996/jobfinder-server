@@ -4,6 +4,10 @@ This is a backend project built with [NestJS](https://nestjs.com/) and connected
 
 ---
 
+## Links to important code files:
+[https://github.com/levitomer1996/jobfinder-server/blob/main/src/users/users.service.ts#L239](makeSuggestedJobsByContentBasedFiltering)
+
+
 ## 📦 Requirements
 
 - Node.js (v18+ recommended)
