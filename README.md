@@ -7,6 +7,8 @@ This is a backend project built with [NestJS](https://nestjs.com/) and connected
 ## Links to important code files:
 [makeSuggestedJobsByContentBasedFiltering](https://github.com/levitomer1996/jobfinder-server/blob/main/src/users/users.service.ts#L239).
 
+[UserGateway for live chat](https://github.com/levitomer1996/jobfinder-server/blob/main/src/users/users.gateway.ts)
+
 
 ## 📦 Requirements
 
