@@ -6,8 +6,9 @@ This is a backend project built with [NestJS](https://nestjs.com/) and connected
 
 ## Links to important code files:
 [makeSuggestedJobsByContentBasedFiltering](https://github.com/levitomer1996/jobfinder-server/blob/main/src/users/users.service.ts#L239).
-
+[JWT strategy](https://github.com/levitomer1996/jobfinder-server/blob/main/src/auth/jwt.strategy.ts)
 [UserGateway for live chat](https://github.com/levitomer1996/jobfinder-server/blob/main/src/users/users.gateway.ts)
+[UploadService](https://github.com/levitomer1996/jobfinder-server/blob/main/src/upload/upload.service.ts) - Manages all uploads - Images, pdfs.
 
 
 ## 📦 Requirements
