@@ -5,7 +5,7 @@ This is a backend project built with [NestJS](https://nestjs.com/) and connected
 ---
 
 ## Links to important code files:
-[https://github.com/levitomer1996/jobfinder-server/blob/main/src/users/users.service.ts#L239]([url](https://github.com/levitomer1996/jobfinder-server/blob/main/src/users/users.service.ts#L239))
+[makeSuggestedJobsByContentBasedFiltering]([https://console.cloud.google.com/](https://github.com/levitomer1996/jobfinder-server/blob/main/src/users/users.service.ts#L239)).
 
 
 ## 📦 Requirements
